@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "Bash(uv tool install:*)"
+      "Bash(uv tool install:*)",
+      "Bash(git fetch:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh:*)",
+      "Bash(npm install:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(npm run migrate:questions:*)",
+      "Bash(npm run server:*)",
+      "Bash(npx tsx:*)",
+      "Bash(node -e:*)"
     ],
     "deny": [],
     "ask": []

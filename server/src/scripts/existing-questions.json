@@ -1,0 +1,602 @@
+[
+  {
+    "type": "single",
+    "question": "西芹汁建議在什麼時間飲用最好？",
+    "options": ["早上空腹", "飯後立即", "睡前", "隨時皆可"],
+    "correctAnswer": 0,
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁最好在早上空腹時飲用，這樣能發揮最佳的療癒效果。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "single",
+    "question": "每日建議的西芹汁飲用量至少是多少？",
+    "options": ["100毫升", "250毫升", "470毫升", "1000毫升"],
+    "correctAnswer": 2,
+    "source": "《神奇西芹汁》",
+    "explanation": "建議每日至少飲用470毫升（16盎司）的純西芹汁以獲得療癒效果。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "single",
+    "question": "西芹汁中最重要的療癒成分是什麼？",
+    "options": ["維生素C", "纖維", "鈉簇鹽", "葉綠素"],
+    "correctAnswer": 2,
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁含有未被發現的鈉簇鹽，這是其最重要的療癒成分，能夠消滅病原體和修復身體。",
+    "difficulty": "進階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "single",
+    "question": "西芹汁可以加入其他蔬果一起榨汁嗎？",
+    "options": ["可以，更營養", "不可以，要純飲", "可以加檸檬", "可以加蘋果"],
+    "correctAnswer": 1,
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁必須純飲，不能加入任何其他成分，才能發揮最大療癒效果。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "single",
+    "question": "西芹汁應該用什麼溫度飲用？",
+    "options": ["冰的", "溫的", "熱的", "室溫"],
+    "correctAnswer": 3,
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁應該在室溫下飲用，不要加冰或加熱。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "single",
+    "question": "新鮮西芹汁可以保存多久？",
+    "options": ["當天飲用最佳", "可放3天", "可放一週", "可冷凍保存"],
+    "correctAnswer": 0,
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁應該現榨現喝，當天飲用效果最好。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "single",
+    "question": "飲用西芹汁可能出現的療癒反應是？",
+    "options": ["頭痛", "疲勞", "皮膚出疹", "以上皆是"],
+    "correctAnswer": 3,
+    "source": "《神奇西芹汁》",
+    "explanation": "飲用西芹汁可能出現各種療癒反應，這是身體排毒的正常現象。",
+    "difficulty": "進階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "single",
+    "question": "西芹汁對哪種健康問題特別有幫助？",
+    "options": ["消化問題", "皮膚問題", "神經系統問題", "以上皆是"],
+    "correctAnswer": 3,
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁對多種健康問題都有幫助，包括消化、皮膚和神經系統。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "single",
+    "question": "西芹汁可以用調理機打嗎？",
+    "options": ["可以", "不可以，必須用榨汁機", "都可以", "用果汁機更好"],
+    "correctAnswer": 1,
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁必須用榨汁機榨取，不能用調理機，因為需要去除纖維。",
+    "difficulty": "進階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "single",
+    "question": "孕婦可以飲用西芹汁嗎？",
+    "options": ["可以", "不可以", "要減量", "要諮詢醫生"],
+    "correctAnswer": 0,
+    "source": "《神奇西芹汁》",
+    "explanation": "孕婦可以安全飲用西芹汁，對母體和胎兒都有益。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "multiple",
+    "question": "飲用西芹汁時應該避免哪些做法？（複選）",
+    "options": ["加入其他蔬果", "加冰塊", "加入纖維", "空腹飲用", "飯後立即飲用"],
+    "correctAnswer": [0, 1, 2, 4],
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁應該純飲，不加任何其他成分，也不要加冰塊或纖維，且應空腹飲用，不要飯後立即飲用。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "multiple",
+    "question": "西芹汁的療癒功效包括？（複選）",
+    "options": ["修復胃黏膜", "降低血壓", "改善皮膚", "增強免疫力", "減肥"],
+    "correctAnswer": [0, 1, 2, 3],
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁具有多種療癒功效，包括修復胃黏膜、降血壓、改善皮膚和增強免疫力。",
+    "difficulty": "進階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "multiple",
+    "question": "哪些人特別需要飲用西芹汁？（複選）",
+    "options": ["消化不良者", "自體免疫疾病患者", "皮膚問題者", "神經系統疾病患者", "健康人"],
+    "correctAnswer": [0, 1, 2, 3, 4],
+    "source": "《神奇西芹汁》",
+    "explanation": "所有人都可以從西芹汁中獲益，無論健康與否。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "multiple",
+    "question": "西芹汁的正確飲用步驟包括？（複選）",
+    "options": ["起床後先喝檸檬水", "等待15-30分鐘", "空腹喝西芹汁", "再等15-30分鐘後進食", "可以立即吃早餐"],
+    "correctAnswer": [0, 1, 2, 3],
+    "source": "《神奇西芹汁》",
+    "explanation": "正確的晨間程序是：檸檬水→等待→西芹汁→等待→早餐。",
+    "difficulty": "進階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "multiple",
+    "question": "西芹汁可以幫助改善哪些症狀？（複選）",
+    "options": ["脹氣", "便秘", "濕疹", "焦慮", "失眠"],
+    "correctAnswer": [0, 1, 2, 3, 4],
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁對這些症狀都有幫助作用。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "fill",
+    "question": "安東尼建議的晨間療癒程序第一步是喝___？",
+    "fillOptions": ["檸檬水", "西芹汁", "蘋果汁", "溫開水", "椰子水", "蜂蜜水"],
+    "correctAnswer": 0,
+    "source": "《神奇西芹汁》",
+    "explanation": "晨間療癒程序第一步是起床後喝500-1000毫升的檸檬水或萊姆水，幫助肝臟排毒。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "fill",
+    "question": "西芹汁建議等待___分鐘後再進食早餐？",
+    "fillOptions": ["15-30分鐘", "30-45分鐘", "45-60分鐘", "60-90分鐘", "10-15分鐘", "5-10分鐘"],
+    "correctAnswer": 0,
+    "source": "《神奇西芹汁》",
+    "explanation": "飲用西芹汁後，建議等待至少15-30分鐘再進食，讓西芹汁充分發揮療癒作用。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "fill",
+    "question": "西芹汁中的___能夠消滅病原體？",
+    "fillOptions": ["鈉簇鹽", "維生素C", "纖維", "葉綠素", "鉀", "鎂"],
+    "correctAnswer": 0,
+    "source": "《神奇西芹汁》",
+    "explanation": "西芹汁中的鈉簇鹽是其最重要的療癒成分。",
+    "difficulty": "進階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "fill",
+    "question": "西芹應該選擇___的品種最好？",
+    "fillOptions": ["有機", "一般", "進口", "本地", "溫室", "露天"],
+    "correctAnswer": 0,
+    "source": "《神奇西芹汁》",
+    "explanation": "選擇有機西芹最好，可以避免農藥殘留。",
+    "difficulty": "初階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "fill",
+    "question": "西芹汁療癒反應通常持續___？",
+    "fillOptions": ["幾天到幾週", "幾小時", "幾個月", "一年", "永久", "不會有"],
+    "correctAnswer": 0,
+    "source": "《神奇西芹汁》",
+    "explanation": "療癒反應通常持續幾天到幾週，因人而異。",
+    "difficulty": "進階",
+    "book": "神奇西芹汁"
+  },
+  {
+    "type": "single",
+    "question": "請問以下何種食物被稱為「療癒之星」？",
+    "options": ["芒果", "野生藍莓", "香蕉", "蘋果"],
+    "correctAnswer": 1,
+    "source": "《改變生命的食物》",
+    "explanation": "野生藍莓是真正的超級食物，具有強大的抗氧化和療癒能力，被稱為療癒之星。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "single",
+    "question": "香蕉對身體最大的益處是什麼？",
+    "options": ["增加肌肉", "提供能量和安撫神經系統", "促進消化", "增強免疫力"],
+    "correctAnswer": 1,
+    "source": "《改變生命的食物》",
+    "explanation": "香蕉富含葡萄糖和鉀，能快速提供能量並安撫神經系統，是非常好的療癒食物。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "single",
+    "question": "木瓜對哪個器官特別有益？",
+    "options": ["心臟", "肺臟", "腸道", "腎臟"],
+    "correctAnswer": 2,
+    "source": "《改變生命的食物》",
+    "explanation": "木瓜含有豐富的酵素，對腸道健康特別有幫助。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "single",
+    "question": "菠菜最大的療癒功效是？",
+    "options": ["補鐵", "鹼化身體", "排重金屬", "增強骨骼"],
+    "correctAnswer": 1,
+    "source": "《改變生命的食物》",
+    "explanation": "菠菜是強大的鹼化食物，能幫助平衡身體的酸鹼值。",
+    "difficulty": "進階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "single",
+    "question": "蘋果最好在什麼時候吃？",
+    "options": ["早上空腹", "飯後", "睡前", "隨時"],
+    "correctAnswer": 0,
+    "source": "《改變生命的食物》",
+    "explanation": "蘋果在早上空腹吃最能發揮排毒和療癒效果。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "single",
+    "question": "芒果對哪個器官特別有益？",
+    "options": ["肝臟", "心臟", "大腦", "腸道"],
+    "correctAnswer": 3,
+    "source": "《改變生命的食物》",
+    "explanation": "芒果對腸道健康特別有幫助，能夠修復腸道黏膜。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "single",
+    "question": "大蒜最強的功效是？",
+    "options": ["抗病毒", "抗細菌", "抗真菌", "以上皆是"],
+    "correctAnswer": 3,
+    "source": "《改變生命的食物》",
+    "explanation": "大蒜具有強大的抗病毒、抗細菌和抗真菌特性。",
+    "difficulty": "進階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "single",
+    "question": "薑最適合用來處理什麼問題？",
+    "options": ["消化不良", "感冒", "發炎", "以上皆是"],
+    "correctAnswer": 3,
+    "source": "《改變生命的食物》",
+    "explanation": "薑對消化、感冒和發炎都有很好的療效。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "single",
+    "question": "芫荽（香菜）最大的功效是？",
+    "options": ["排重金屬", "補充維生素", "增強免疫", "抗氧化"],
+    "correctAnswer": 0,
+    "source": "《改變生命的食物》",
+    "explanation": "芫荽能夠幫助身體排出重金屬，是重金屬排毒的重要食材。",
+    "difficulty": "進階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "single",
+    "question": "羽衣甘藍對哪個系統特別有益？",
+    "options": ["消化系統", "神經系統", "免疫系統", "循環系統"],
+    "correctAnswer": 2,
+    "source": "《改變生命的食物》",
+    "explanation": "羽衣甘藍能夠增強免疫系統功能。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "multiple",
+    "question": "以下哪些是重金屬排毒果昔的必要成分？（複選）",
+    "options": ["野生藍莓", "香菜", "螺旋藻", "大麥草汁粉", "蘋果", "檸檬"],
+    "correctAnswer": [0, 1, 2, 3],
+    "source": "《改變生命的食物》",
+    "explanation": "重金屬排毒果昔的五大必要成分是：野生藍莓、香菜、螺旋藻、大麥草汁粉和大西洋紅藻。",
+    "difficulty": "進階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "multiple",
+    "question": "以下哪些食物被列為「療癒食物」？（複選）",
+    "options": ["野生藍莓", "芒果", "木瓜", "菠菜", "羽衣甘藍"],
+    "correctAnswer": [0, 1, 2, 3, 4],
+    "source": "《改變生命的食物》",
+    "explanation": "這些都是安東尼推薦的療癒食物，各自具有獨特的療癒特性。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "multiple",
+    "question": "水果的最佳食用時間是？（複選）",
+    "options": ["早上空腹", "兩餐之間", "飯前30分鐘", "飯後立即", "睡前"],
+    "correctAnswer": [0, 1, 2],
+    "source": "《改變生命的食物》",
+    "explanation": "水果最好在空腹時食用，如早上、兩餐之間或飯前30分鐘。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "multiple",
+    "question": "哪些食物富含抗氧化劑？（複選）",
+    "options": ["野生藍莓", "石榴", "黑莓", "櫻桃", "葡萄"],
+    "correctAnswer": [0, 1, 2, 3, 4],
+    "source": "《改變生命的食物》",
+    "explanation": "這些水果都富含強大的抗氧化劑。",
+    "difficulty": "進階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "multiple",
+    "question": "以下哪些是十字花科蔬菜？（複選）",
+    "options": ["羽衣甘藍", "青花菜", "高麗菜", "菠菜", "白菜"],
+    "correctAnswer": [0, 1, 2, 4],
+    "source": "《改變生命的食物》",
+    "explanation": "十字花科蔬菜包括羽衣甘藍、青花菜、高麗菜和白菜，菠菜不是。",
+    "difficulty": "進階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "fill",
+    "question": "野生藍莓最強大的療癒能力是修復___？",
+    "fillOptions": ["大腦", "肝臟", "腎臟", "心臟", "肺臟", "腸道"],
+    "correctAnswer": 0,
+    "source": "《改變生命的食物》",
+    "explanation": "野生藍莓含有強大的抗氧化物質，能穿越血腦屏障，修復和保護大腦組織。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "fill",
+    "question": "重金屬排毒需要___種主要食材協同作用？",
+    "fillOptions": ["5種", "3種", "7種", "10種", "2種", "4種"],
+    "correctAnswer": 0,
+    "source": "《改變生命的食物》",
+    "explanation": "重金屬排毒需要五種食材：野生藍莓、香菜、螺旋藻、大麥草汁粉和大西洋紅藻。",
+    "difficulty": "進階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "fill",
+    "question": "___是最強大的抗病毒食物之一？",
+    "fillOptions": ["大蒜", "薑", "蜂蜜", "檸檬", "洋蔥", "辣椒"],
+    "correctAnswer": 0,
+    "source": "《改變生命的食物》",
+    "explanation": "大蒜具有極強的抗病毒、抗細菌和抗真菌特性。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "fill",
+    "question": "香蕉富含___能安撫神經系統？",
+    "fillOptions": ["鉀和葡萄糖", "維生素C", "蛋白質", "脂肪", "鈣", "鐵"],
+    "correctAnswer": 0,
+    "source": "《改變生命的食物》",
+    "explanation": "香蕉富含鉀和葡萄糖，這兩種營養素能有效安撫神經系統。",
+    "difficulty": "進階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "fill",
+    "question": "水果最好在___食用效果最佳？",
+    "fillOptions": ["空腹時", "飯後", "睡前", "運動前", "隨時", "飯中"],
+    "correctAnswer": 0,
+    "source": "《改變生命的食物》",
+    "explanation": "水果在空腹時食用最能發揮其療癒和營養效果。",
+    "difficulty": "初階",
+    "book": "改變生命的食物"
+  },
+  {
+    "type": "single",
+    "question": "請問肝臟每隔多少年，會完整更新完一次全部的細胞？",
+    "options": ["3年", "6年", "7年", "9年"],
+    "correctAnswer": 0,
+    "source": "《搶救肝臟》第34章 p.349",
+    "explanation": "人體內最強大的器官是肝臟，因為它具有從幾乎完全毀壞中復原的能力。肝臟每隔3年左右，會完整更新完一次所有的細胞。",
+    "difficulty": "進階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "single",
+    "question": "肝臟主要負責過濾哪種毒素？",
+    "options": ["糖分", "蛋白質", "病原體和毒素", "維生素"],
+    "correctAnswer": 2,
+    "source": "《搶救肝臟》",
+    "explanation": "肝臟是人體主要的解毒器官，負責過濾和處理各種病原體、毒素和有害物質。",
+    "difficulty": "初階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "single",
+    "question": "以下哪種情況會對肝臟造成最大負擔？",
+    "options": ["高糖飲食", "高脂肪飲食", "高蛋白飲食", "高纖維飲食"],
+    "correctAnswer": 1,
+    "source": "《搶救肝臟》",
+    "explanation": "高脂肪飲食會讓肝臟需要處理大量脂肪，造成肝臟負擔過重，影響其正常功能。",
+    "difficulty": "進階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "single",
+    "question": "EB病毒（Epstein-Barr virus）主要影響身體哪個器官？",
+    "options": ["心臟", "肺臟", "肝臟", "腎臟"],
+    "correctAnswer": 2,
+    "source": "《搶救肝臟》",
+    "explanation": "EB病毒是一種常見的病毒，主要寄生在肝臟中，會削弱肝臟功能並引發各種慢性症狀。",
+    "difficulty": "進階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "single",
+    "question": "早晨起床後，肝臟最需要的是什麼？",
+    "options": ["蛋白質", "脂肪", "葡萄糖", "纖維"],
+    "correctAnswer": 2,
+    "source": "《搶救肝臟》",
+    "explanation": "早晨起床後，肝臟最需要葡萄糖來補充能量，幫助肝臟恢復和執行解毒功能。水果是最佳來源。",
+    "difficulty": "進階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "single",
+    "question": "肝臟每天需要執行超過多少種化學功能？",
+    "options": ["500種", "1000種", "2000種", "3000種"],
+    "correctAnswer": 2,
+    "source": "《搶救肝臟》",
+    "explanation": "肝臟每天需要執行超過2000種化學功能，是人體最繁忙的器官。",
+    "difficulty": "初階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "single",
+    "question": "脂肪肝最主要的原因是？",
+    "options": ["吃太多油", "吃太多糖", "吃太多蛋白質", "吃太多澱粉"],
+    "correctAnswer": 0,
+    "source": "《搶救肝臟》",
+    "explanation": "脂肪肝主要是因為攝取過多脂肪，導致肝臟無法完全處理而堆積。",
+    "difficulty": "初階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "single",
+    "question": "肝臟排毒的黃金時段是？",
+    "options": ["早上6-8點", "中午12-2點", "下午3-5點", "凌晨1-3點"],
+    "correctAnswer": 3,
+    "source": "《搶救肝臟》",
+    "explanation": "肝臟在凌晨1-3點進行最重要的修復和解毒工作。",
+    "difficulty": "進階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "single",
+    "question": "369排毒法總共需要幾天？",
+    "options": ["3天", "6天", "9天", "18天"],
+    "correctAnswer": 2,
+    "source": "《搶救肝臟》",
+    "explanation": "369排毒法總共需要9天（前3天、中間6天、最後9天的階段性排毒）。",
+    "difficulty": "初階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "single",
+    "question": "肝臟最喜歡的糖分來源是？",
+    "options": ["蔗糖", "果糖", "葡萄糖", "乳糖"],
+    "correctAnswer": 2,
+    "source": "《搶救肝臟》",
+    "explanation": "肝臟最喜歡的是來自水果的天然葡萄糖。",
+    "difficulty": "初階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "multiple",
+    "question": "以下哪些症狀可能與肝臟問題有關？（複選）",
+    "options": ["皮膚問題", "疲勞", "消化不良", "情緒波動", "關節疼痛"],
+    "correctAnswer": [0, 1, 2, 3],
+    "source": "《搶救肝臟》",
+    "explanation": "肝臟問題會導致多種症狀，包括皮膚問題、疲勞、消化不良和情緒波動等。",
+    "difficulty": "初階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "multiple",
+    "question": "肝臟的主要功能包括哪些？（複選）",
+    "options": ["解毒", "儲存營養", "產生膽汁", "調節血糖", "產生紅血球"],
+    "correctAnswer": [0, 1, 2, 3],
+    "source": "《搶救肝臟》",
+    "explanation": "肝臟負責解毒、儲存維生素和礦物質、產生膽汁幫助消化、調節血糖等多項重要功能。",
+    "difficulty": "進階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "multiple",
+    "question": "哪些食物對肝臟特別有益？（複選）",
+    "options": ["水果", "綠葉蔬菜", "薯類", "堅果", "動物蛋白"],
+    "correctAnswer": [0, 1, 2],
+    "source": "《搶救肝臟》",
+    "explanation": "水果、綠葉蔬菜和薯類對肝臟特別有益，提供易於利用的葡萄糖和營養素。",
+    "difficulty": "初階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "multiple",
+    "question": "晨間肝臟排毒程序包括？（複選）",
+    "options": ["檸檬水", "西芹汁", "重金屬排毒果昔", "咖啡", "水果早餐"],
+    "correctAnswer": [0, 1, 2, 4],
+    "source": "《搶救肝臟》",
+    "explanation": "晨間肝臟排毒程序包括檸檬水、西芹汁、重金屬排毒果昔和水果早餐。",
+    "difficulty": "進階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "multiple",
+    "question": "以下哪些會傷害肝臟？（複選）",
+    "options": ["高脂飲食", "酒精", "咖啡因", "加工食品", "新鮮水果"],
+    "correctAnswer": [0, 1, 2, 3],
+    "source": "《搶救肝臟》",
+    "explanation": "高脂飲食、酒精、咖啡因和加工食品都會增加肝臟負擔。新鮮水果對肝臟有益。",
+    "difficulty": "初階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "fill",
+    "question": "肝臟在___時段進行最重要的修復和解毒工作？",
+    "fillOptions": ["凌晨1-3點", "早上6-8點", "中午12-2點", "下午3-5點", "晚上8-10點", "深夜11-1點"],
+    "correctAnswer": 0,
+    "source": "《搶救肝臟》",
+    "explanation": "肝臟在凌晨1-3點進行最重要的修復和解毒工作，這是肝臟的黃金修復時間。",
+    "difficulty": "進階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "fill",
+    "question": "肝臟儲存的___是大腦和身體最重要的燃料？",
+    "fillOptions": ["葡萄糖", "蛋白質", "脂肪", "維生素", "礦物質", "酵素"],
+    "correctAnswer": 0,
+    "source": "《搶救肝臟》",
+    "explanation": "肝臟儲存葡萄糖（以肝醣形式），這是大腦和身體最重要、最容易利用的燃料來源。",
+    "difficulty": "進階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "fill",
+    "question": "___是EB病毒最喜歡的食物？",
+    "fillOptions": ["重金屬", "糖分", "脂肪", "蛋白質", "維生素", "礦物質"],
+    "correctAnswer": 0,
+    "source": "《搶救肝臟》",
+    "explanation": "EB病毒以重金屬為食，這也是為什麼排重金屬對療癒很重要。",
+    "difficulty": "初階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "fill",
+    "question": "肝臟需要___來執行超過2000種化學功能？",
+    "fillOptions": ["生物可利用的葡萄糖", "蛋白質", "脂肪", "維生素", "礦物質", "水分"],
+    "correctAnswer": 0,
+    "source": "《搶救肝臟》",
+    "explanation": "肝臟需要生物可利用的葡萄糖來執行其眾多功能，水果是最佳來源。",
+    "difficulty": "進階",
+    "book": "搶救肝臟"
+  },
+  {
+    "type": "fill",
+    "question": "369排毒法最後___天只喝果汁和椰子水？",
+    "fillOptions": ["1-2天", "3天", "6天", "9天", "全程", "不需要"],
+    "correctAnswer": 0,
+    "source": "《搶救肝臟》",
+    "explanation": "369排毒法的最後1-2天是最密集的排毒階段，只喝果汁和椰子水。",
+    "difficulty": "初階",
+    "book": "搶救肝臟"
+  }
+]

@@ -1,20 +1,20 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-size: 16px;
-  --background: #FAFAF7;
+  --font-size: 24px;
+  --background: #fafaf7;
   --foreground: #2d3436;
   --card: #ffffff;
   --card-foreground: #2d3436;
   --popover: #ffffff;
   --popover-foreground: #2d3436;
-  --primary: #A8CBB7;
+  --primary: #a8cbb7;
   --primary-foreground: #ffffff;
-  --secondary: #F7E6C3;
+  --secondary: #f7e6c3;
   --secondary-foreground: #2d3436;
   --muted: #e8ebe9;
   --muted-foreground: #636e72;
-  --accent: #E5C17A;
+  --accent: #e5c17a;
   --accent-foreground: #2d3436;
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
@@ -24,27 +24,27 @@
   --switch-background: #cbced4;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #A8CBB7;
-  --chart-1: #A8CBB7;
-  --chart-2: #E5C17A;
-  --chart-3: #F7E6C3;
+  --ring: #a8cbb7;
+  --chart-1: #a8cbb7;
+  --chart-2: #e5c17a;
+  --chart-3: #f7e6c3;
   --chart-4: #9fb8a8;
   --chart-5: #d4b86a;
   --radius: 1rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #A8CBB7;
+  --sidebar-primary: #a8cbb7;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  
+
   /* Custom healing theme colors */
-  --healing-green: #A8CBB7;
-  --healing-cream: #FAFAF7;
-  --healing-gold: #E5C17A;
-  --healing-light: #F7E6C3;
+  --healing-green: #a8cbb7;
+  --healing-cream: #fafaf7;
+  --healing-gold: #e5c17a;
+  --healing-light: #f7e6c3;
 }
 
 .dark {
@@ -130,15 +130,27 @@
     @apply border-border outline-ring/50;
   }
 
+  /* Global font scaling: 1.75x (affects all Tailwind rem-based text sizes) */
+  html {
+    font-size: 175%;
+  }
+
   body {
     @apply bg-background text-foreground;
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(168, 203, 183, 0.03) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(229, 193, 122, 0.03) 0%, transparent 50%);
+    background-image: radial-gradient(
+        circle at 25% 25%,
+        rgba(168, 203, 183, 0.03) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 75% 75%,
+        rgba(229, 193, 122, 0.03) 0%,
+        transparent 50%
+      );
   }
-  
+
   body::before {
-    content: '';
+    content: "";
     position: fixed;
     top: 0;
     left: 0;
@@ -224,7 +236,8 @@ html {
 
 /* Soft glow effect for cards */
 @keyframes soft-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(168, 203, 183, 0.1);
   }
   50% {
@@ -246,4 +259,8 @@ html {
     transform: translateY(0) rotate(360deg);
     opacity: 0.6;
   }
+}
+/* Ensure radio indicator shows selected color, independent of Tailwind arbitrary classes */
+[data-slot="radio-group-item"][data-state="checked"] .checked-dot {
+  background-color: #a8cbb7 !important;
 }

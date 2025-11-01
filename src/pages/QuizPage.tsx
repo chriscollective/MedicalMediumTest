@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { QuestionCard, Question } from '../components/QuestionCard';
 import { QuizProgress } from '../components/QuizProgress';
 import { Button } from '../components/ui/button';
 import { NatureAccents } from '../components/NatureAccents';
 import { ChevronLeft, ChevronRight, Home, Pause, Sparkles } from 'lucide-react';
+import { fetchQuizQuestions, fetchMixedQuizQuestions } from '../services/questionService';
+import { createQuiz, submitQuiz } from '../services/quizService';
+import { getUserId } from '../utils/userStorage';
+import { Question as ApiQuestion } from '../types/question';
+import { getBookByDisplay, getDifficultyByKey } from '../constants/books';
+
+interface QuizResult {
+  score: number;
+  totalQuestions: number;
+  wrongQuestions: Array<{
+    question: Question;
+    userAnswer: string | string[];
+  }>;
+  answers: Record<string, string | string[]>;
+}
 
 interface QuizPageProps {
   books: string[];
   difficulty: string;
-  onComplete: (answers: Record<string, string | string[]>) => void;
+  onComplete: (result: QuizResult) => void;
   onBack: () => void;
 }
 
@@ -190,8 +205,111 @@ export function QuizPage({ books, difficulty, onComplete, onBack }: QuizPageProp
   const [currentPage, setCurrentPage] = useState(1);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
-  
-  const questions = generateMockQuestions();
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [quizId, setQuizId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // 載入題目
+  useEffect(() => {
+    async function loadQuestions() {
+      try {
+        setLoading(true);
+
+        // 使用映射轉換難度（beginner/advanced -> 初階/進階）
+        const apiDifficulty = getDifficultyByKey(difficulty);
+
+        let apiQuestions: ApiQuestion[];
+
+        // 如果選擇多本書，使用混合抽題
+        if (books.length > 1) {
+          // 轉換所有書籍名稱
+          const dbBooks = books.map(bookDisplay => getBookByDisplay(bookDisplay));
+          console.log('📚 準備載入多本書混合題目:', { books: dbBooks, difficulty: apiDifficulty });
+
+          apiQuestions = await fetchMixedQuizQuestions(dbBooks, apiDifficulty);
+        } else {
+          // 單本書，使用原本的邏輯
+          const bookDisplay = books[0] || '《神奇西芹汁》';
+          const book = getBookByDisplay(bookDisplay);
+          console.log('📚 準備載入單本書題目:', { book, difficulty: apiDifficulty });
+
+          apiQuestions = await fetchQuizQuestions(book, apiDifficulty);
+        }
+
+        if (apiQuestions.length !== 20) {
+          throw new Error(`題庫不足，僅取得 ${apiQuestions.length} 題，需要 20 題`);
+        }
+
+        // 轉換 API 格式為 UI 格式
+        const uiQuestions: Question[] = apiQuestions.map((q: ApiQuestion) => {
+          // 將數字索引轉換為實際的字串答案
+          let correctAnswerStr: string | string[];
+
+          if (q.type === 'single') {
+            // 單選：從 options 取得對應索引的字串
+            correctAnswerStr = q.options?.[q.correctAnswer as number] || '';
+          } else if (q.type === 'multiple') {
+            // 多選：從 options 取得所有索引對應的字串
+            const indices = q.correctAnswer as number[];
+            correctAnswerStr = indices.map(idx => q.options?.[idx] || '').filter(Boolean);
+          } else {
+            // 填空：從 fillOptions 取得對應索引的字串
+            correctAnswerStr = q.fillOptions?.[q.correctAnswer as number] || '';
+          }
+
+          return {
+            id: q._id,
+            type: q.type,
+            question: q.question,
+            options: q.options,
+            fillOptions: q.fillOptions,
+            correctAnswer: correctAnswerStr,
+            source: q.source,
+            explanation: q.explanation
+          };
+        });
+
+        setQuestions(uiQuestions);
+        setError(null);
+
+        // 建立測驗記錄
+        try {
+          const userId = getUserId();
+          // 對於多本書，使用第一本書作為主要書籍記錄（或可以改成「混合」）
+          const primaryBook = books.length > 1
+            ? getBookByDisplay(books[0])
+            : getBookByDisplay(books[0] || '《神奇西芹汁》');
+
+          console.log('準備建立測驗記錄:', { userId, book: primaryBook, difficulty: apiDifficulty, questionCount: apiQuestions.length });
+
+          const quiz = await createQuiz({
+            userId,
+            book: primaryBook,
+            difficulty: apiDifficulty,
+            questionIds: apiQuestions.map(q => q._id)
+          });
+          setQuizId(quiz._id);
+          console.log('✅ 測驗記錄已建立:', quiz._id);
+        } catch (quizErr: any) {
+          console.error('❌ 建立測驗記錄失敗:', quizErr);
+          console.error('錯誤詳情:', quizErr.response?.data || quizErr.message);
+          // 不影響繼續作答，只是無法記錄
+        }
+      } catch (err: any) {
+        console.error('載入題目失敗:', err);
+        setError(err.message || '載入題目失敗，請稍後再試');
+        // 使用 Mock 資料作為備案
+        setQuestions(generateMockQuestions());
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadQuestions();
+  }, [books, difficulty]);
+
   const questionsPerPage = 5;
   const totalPages = Math.ceil(questions.length / questionsPerPage);
   
@@ -207,12 +325,145 @@ export function QuizPage({ books, difficulty, onComplete, onBack }: QuizPageProp
     }));
   };
   
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentPage < totalPages) {
       setDirection('forward');
       setCurrentPage(prev => prev + 1);
+      // 滾動到頁面頂部
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
+      // 在最後一頁點擊完成時，檢查是否所有題目都已作答
+      const unansweredQuestions: number[] = [];
+
+      questions.forEach((question, index) => {
+        const answer = answers[question.id];
+
+        // 檢查答案是否存在且有效
+        const isAnswered = answer !== undefined &&
+                          answer !== null &&
+                          (Array.isArray(answer) ? answer.length > 0 : answer !== '');
+
+        if (!isAnswered) {
+          unansweredQuestions.push(index + 1); // 題號從 1 開始
+        }
+      });
+
+      // 如果有未作答的題目，顯示警告
+      if (unansweredQuestions.length > 0) {
+        const questionNumbers = unansweredQuestions.join('、');
+        alert(`第 ${questionNumbers} 題尚未作答，請完成答題後再交卷！`);
+        return;
+      }
+
+      // 所有題目都已作答，提交測驗
+      await handleSubmit();
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!quizId) {
+      console.error('無測驗 ID，無法提交');
       onComplete(answers);
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      // 轉換答案格式：從 string/string[] 轉為 index number/number[]
+      const submissionAnswers = questions.map(question => {
+        const userAnswer = answers[question.id];
+        let convertedAnswer: number | number[] | null = null;
+
+        if (userAnswer !== undefined && userAnswer !== null) {
+          if (question.type === 'single') {
+            // 單選：找到選項的 index
+            const index = question.options?.indexOf(userAnswer as string) ?? -1;
+            convertedAnswer = index >= 0 ? index : null;
+          } else if (question.type === 'multiple') {
+            // 多選：找到所有選項的 indices
+            const selectedOptions = userAnswer as string[];
+            convertedAnswer = selectedOptions
+              .map(opt => question.options?.indexOf(opt) ?? -1)
+              .filter(idx => idx >= 0);
+          } else if (question.type === 'fill') {
+            // 填空：找到填空選項的 index
+            const index = question.fillOptions?.indexOf(userAnswer as string) ?? -1;
+            convertedAnswer = index >= 0 ? index : null;
+          }
+        }
+
+        return {
+          questionId: question.id,
+          userAnswer: convertedAnswer
+        };
+      });
+
+      // 提交到 API
+      const result = await submitQuiz(quizId, {
+        answers: submissionAnswers
+      });
+
+      console.log('測驗提交成功:', result);
+
+      // 將 API 回傳的 answerBitmap 轉換為錯題列表
+      const wrongQuestions: Array<{ question: Question; userAnswer: string | string[] }> = [];
+
+      // answerBitmap 是 20 個字元的字串，'1' 代表正確，'0' 代表錯誤
+      if (result.answerBitmap) {
+        result.answerBitmap.split('').forEach((bit, index) => {
+          if (bit === '0') {
+            // 這題答錯了
+            const question = questions[index];
+            if (question) {
+              const userAnswer = answers[question.id];
+              wrongQuestions.push({ question, userAnswer });
+            }
+          }
+        });
+      }
+
+      // 傳遞完整結果給 onComplete
+      onComplete({
+        score: result.correctCount,
+        totalQuestions: result.totalQuestions,
+        wrongQuestions,
+        answers
+      });
+    } catch (err) {
+      console.error('提交測驗失敗:', err);
+      // 提交失敗時，使用本地計算的結果
+      const wrongQuestions: Array<{ question: Question; userAnswer: string | string[] }> = [];
+      let score = 0;
+
+      questions.forEach(question => {
+        const userAnswer = answers[question.id];
+        const correctAnswer = question.correctAnswer;
+
+        let isCorrect = false;
+        if (question.type === 'multiple') {
+          const userArr = (userAnswer as string[]) || [];
+          const correctArr = correctAnswer as string[];
+          isCorrect = userArr.length === correctArr.length && userArr.every(a => correctArr.includes(a));
+        } else {
+          isCorrect = userAnswer === correctAnswer;
+        }
+
+        if (isCorrect) {
+          score++;
+        } else {
+          wrongQuestions.push({ question, userAnswer });
+        }
+      });
+
+      onComplete({
+        score,
+        totalQuestions: questions.length,
+        wrongQuestions,
+        answers
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
   
@@ -220,13 +471,39 @@ export function QuizPage({ books, difficulty, onComplete, onBack }: QuizPageProp
     if (currentPage > 1) {
       setDirection('backward');
       setCurrentPage(prev => prev - 1);
+      // 滾動到頁面頂部
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
   
+  // Loading 狀態
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FAFAF7] to-[#F7E6C3]/30 flex items-center justify-center">
+        <div className="text-center">
+          <Sparkles className="w-12 h-12 text-[#A8CBB7] animate-pulse mx-auto mb-4" />
+          <p className="text-[#636e72] text-lg">正在載入題目...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error 狀態（顯示警告但繼續使用 Mock 資料）
+  const showErrorBanner = error && questions.length > 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FAFAF7] to-[#F7E6C3]/30 relative overflow-hidden">
       {/* Nature Accents */}
       <NatureAccents variant="minimal" />
+
+      {/* Error Banner */}
+      {showErrorBanner && (
+        <div className="sticky top-0 z-50 bg-yellow-100 border-b border-yellow-300 px-4 py-2">
+          <p className="text-yellow-800 text-sm text-center">
+            ⚠️ {error} - 目前使用範例題目
+          </p>
+        </div>
+      )}
       
       {/* Top Navigation */}
       <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm border-b border-[#A8CBB7]/20">
@@ -312,16 +589,18 @@ export function QuizPage({ books, difficulty, onComplete, onBack }: QuizPageProp
           
           <Button
             onClick={handleNext}
+            disabled={submitting}
             className="
               rounded-full px-6 h-12
               bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8]
               text-white shadow-lg hover:shadow-xl
               transition-all duration-300
               flex items-center gap-2
+              disabled:opacity-50 disabled:cursor-not-allowed
             "
           >
-            {currentPage === totalPages ? '完成' : '下一頁'}
-            <ChevronRight className="w-5 h-5" />
+            {submitting ? '提交中...' : currentPage === totalPages ? '完成' : '下一頁'}
+            {!submitting && <ChevronRight className="w-5 h-5" />}
           </Button>
         </div>
         

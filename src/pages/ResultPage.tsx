@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { GradeBadge } from '../components/GradeBadge';
 import { Button } from '../components/ui/button';
@@ -8,6 +8,8 @@ import { NatureAccents } from '../components/NatureAccents';
 import { FloatingHerbs } from '../components/FloatingHerbs';
 import { Share2, RotateCcw, Home } from 'lucide-react';
 import { Question } from '../components/QuestionCard';
+import { LeaderboardNameDialog } from '../components/LeaderboardNameDialog';
+import { checkLeaderboard, submitLeaderboard } from '../services/leaderboardService';
 
 interface ResultPageProps {
   score: number;
@@ -16,12 +18,15 @@ interface ResultPageProps {
     question: Question;
     userAnswer: string | string[];
   }>;
+  books: string[];
+  difficulty: string;
+  userId: string;
   onRestart: () => void;
   onHome: () => void;
 }
 
 const calculateGrade = (percentage: number): 'S' | 'A+' | 'A' | 'B+' | 'B' | 'C+' | 'F' => {
-  if (percentage >= 95) return 'S';
+  if (percentage === 100) return 'S';
   if (percentage >= 90) return 'A+';
   if (percentage >= 80) return 'A';
   if (percentage >= 70) return 'B+';
@@ -40,11 +45,63 @@ const gradeMessages = {
   'F': '🌾 別氣餒！從頭開始，慢慢學習！'
 };
 
-export function ResultPage({ score, totalQuestions, wrongQuestions, onRestart, onHome }: ResultPageProps) {
+export function ResultPage({ score, totalQuestions, wrongQuestions, books, difficulty, userId, onRestart, onHome }: ResultPageProps) {
   const percentage = (score / totalQuestions) * 100;
   const grade = calculateGrade(percentage);
   const message = gradeMessages[grade];
-  
+
+  const [showLeaderboardDialog, setShowLeaderboardDialog] = useState(false);
+  const [leaderboardRank, setLeaderboardRank] = useState(0);
+
+  // 檢查是否上榜
+  useEffect(() => {
+    const checkIfQualified = async () => {
+      try {
+        // 決定書籍類別（單本或綜合）
+        let bookCategory = books.length > 1 ? '綜合' : books[0];
+        // 移除書名號
+        bookCategory = bookCategory.replace(/《|》/g, '');
+
+        const result = await checkLeaderboard(
+          userId,
+          bookCategory,
+          difficulty,
+          percentage
+        );
+
+        if (result.qualified && result.rank) {
+          setLeaderboardRank(result.rank);
+          setShowLeaderboardDialog(true);
+        }
+      } catch (error) {
+        console.error('檢查榜單失敗:', error);
+      }
+    };
+
+    checkIfQualified();
+  }, [userId, books, difficulty, percentage]);
+
+  const handleSubmitLeaderboard = async (displayName: string) => {
+    try {
+      let bookCategory = books.length > 1 ? '綜合' : books[0];
+      // 移除書名號
+      bookCategory = bookCategory.replace(/《|》/g, '');
+
+      await submitLeaderboard(
+        userId,
+        bookCategory,
+        difficulty,
+        percentage,
+        displayName
+      );
+
+      alert('恭喜！你的成績已成功登上榜單！');
+    } catch (error) {
+      console.error('提交榜單失敗:', error);
+      throw error;
+    }
+  };
+
   const handleShare = () => {
     const text = `我在「醫療靈媒隨堂測驗」中獲得了 ${grade} 等級！答對率 ${percentage.toFixed(1)}% 🌿`;
     if (navigator.share) {
@@ -141,7 +198,7 @@ export function ResultPage({ score, totalQuestions, wrongQuestions, onRestart, o
           </motion.div>
           
           {/* Wrong Questions Analysis */}
-          {wrongQuestions.length > 0 && (
+          {wrongQuestions && wrongQuestions.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -197,6 +254,14 @@ export function ResultPage({ score, totalQuestions, wrongQuestions, onRestart, o
           )}
         </motion.div>
       </div>
+
+      {/* Leaderboard Name Dialog */}
+      <LeaderboardNameDialog
+        open={showLeaderboardDialog}
+        rank={leaderboardRank}
+        onSubmit={handleSubmitLeaderboard}
+        onClose={() => setShowLeaderboardDialog(false)}
+      />
     </div>
   );
 }

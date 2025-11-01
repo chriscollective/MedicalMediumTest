@@ -1,59 +1,64 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { BookCard } from '../components/BookCard';
-import { Button } from '../components/ui/button';
-import { NatureDecoration } from '../components/NatureDecoration';
-import { FloatingHerbs } from '../components/FloatingHerbs';
-import { NaturalPattern } from '../components/NaturalPattern';
-import { Sparkles } from 'lucide-react';
+import React, { useState } from "react";
+import { motion } from "motion/react";
+import { BookCard } from "../components/BookCard";
+import { Button } from "../components/ui/button";
+import { NatureDecoration } from "../components/NatureDecoration";
+import { FloatingHerbs } from "../components/FloatingHerbs";
+import { NaturalPattern } from "../components/NaturalPattern";
+import { Sparkles } from "lucide-react";
+import { BOOKS } from "../constants/books";
 
 interface LandingPageProps {
-  onStart: (books: string[], difficulty: 'beginner' | 'advanced') => void;
+  onStart: (books: string[], difficulty: "beginner" | "advanced") => void;
   onAdminClick?: () => void;
+  onLeaderboardClick?: () => void;
+  onAboutClick?: () => void;
 }
 
-export function LandingPage({ onStart, onAdminClick }: LandingPageProps) {
+export function LandingPage({
+  onStart,
+  onAdminClick,
+  onLeaderboardClick,
+  onAboutClick,
+}: LandingPageProps) {
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
-  const [difficulty, setDifficulty] = useState<'beginner' | 'advanced'>('beginner');
-  
-  const books = [
-    '《搶救肝臟》',
-    '《神奇西芹汁》',
-    '《改變生命的食物》'
-  ];
-  
+  const [difficulty, setDifficulty] = useState<"beginner" | "advanced">(
+    "beginner"
+  );
+
+  const books = BOOKS.map((b) => b.display);
+
   const toggleBook = (book: string) => {
-    setSelectedBooks(prev =>
-      prev.includes(book)
-        ? prev.filter(b => b !== book)
-        : [...prev, book]
+    setSelectedBooks((prev) =>
+      prev.includes(book) ? prev.filter((b) => b !== book) : [...prev, book]
     );
   };
-  
+
   const handleStart = () => {
     if (selectedBooks.length > 0) {
       onStart(selectedBooks, difficulty);
     }
   };
-  
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
       {/* Background blur effect */}
-      <div className="absolute inset-0 opacity-30" 
-           style={{
-             backgroundImage: `url('https://images.unsplash.com/photo-1604248215430-100912b27ead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwbmF0dXJlJTIwbGVhdmVzJTIwbGlnaHR8ZW58MXx8fHwxNzYxODA3MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080')`,
-             backgroundSize: 'cover',
-             backgroundPosition: 'center',
-             filter: 'blur(60px)'
-           }}
+      <div
+        className="absolute inset-0 opacity-30"
+        style={{
+          backgroundImage: `url('https://images.unsplash.com/photo-1604248215430-100912b27ead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwbmF0dXJlJTIwbGVhdmVzJTIwbGlnaHR8ZW58MXx8fHwxNzYxODA3MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(60px)",
+        }}
       />
-      
+
       {/* Nature Decorations */}
       <NaturalPattern />
       <NatureDecoration />
       <FloatingHerbs />
-      
-      <div className="relative z-10 container mx-auto px-4 py-16 flex flex-col items-center">
+
+      <div className="relative z-10 container mx-auto px-4 min-h-screen flex flex-col items-center justify-center py-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -62,12 +67,16 @@ export function LandingPage({ onStart, onAdminClick }: LandingPageProps) {
         >
           <div className="flex items-center justify-center gap-3 mb-4">
             <Sparkles className="w-8 h-8 text-[#E5C17A]" />
-            <h1 className="text-[#2d3436]">醫療靈媒隨堂測驗</h1>
+            <h1 className="text-2xl md:text-3xl text-[#2d3436]">
+              醫療靈媒隨堂測驗
+            </h1>
             <Sparkles className="w-8 h-8 text-[#E5C17A]" />
           </div>
-          <p className="text-[#636e72] text-lg">測測你對安東尼療癒知識的理解程度 🌿</p>
+          <p className="text-[#636e72] text-lg">
+            測測你對安東尼療癒知識的理解程度 🌿
+          </p>
         </motion.div>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -94,32 +103,34 @@ export function LandingPage({ onStart, onAdminClick }: LandingPageProps) {
               ))}
             </div>
           </div>
-          
+
           {/* Difficulty Selection */}
           <div className="space-y-4">
             <h3 className="text-center text-[#2d3436]">選擇難度</h3>
             <div className="flex justify-center gap-4">
               <Button
-                variant={difficulty === 'beginner' ? 'default' : 'outline'}
-                onClick={() => setDifficulty('beginner')}
+                variant={difficulty === "beginner" ? "default" : "outline"}
+                onClick={() => setDifficulty("beginner")}
                 className={`
                   px-8 py-6 rounded-2xl transition-all duration-300
-                  ${difficulty === 'beginner'
-                    ? 'bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white shadow-lg hover:shadow-xl'
-                    : 'border-[#A8CBB7] text-[#2d3436] hover:bg-[#F7E6C3]/20'
+                  ${
+                    difficulty === "beginner"
+                      ? "bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white shadow-lg hover:shadow-xl"
+                      : "border-[#A8CBB7] text-[#2d3436] hover:bg-[#F7E6C3]/20"
                   }
                 `}
               >
                 初階
               </Button>
               <Button
-                variant={difficulty === 'advanced' ? 'default' : 'outline'}
-                onClick={() => setDifficulty('advanced')}
+                variant={difficulty === "advanced" ? "default" : "outline"}
+                onClick={() => setDifficulty("advanced")}
                 className={`
                   px-8 py-6 rounded-2xl transition-all duration-300
-                  ${difficulty === 'advanced'
-                    ? 'bg-gradient-to-r from-[#E5C17A] to-[#d4b86a] text-white shadow-lg hover:shadow-xl'
-                    : 'border-[#E5C17A] text-[#2d3436] hover:bg-[#F7E6C3]/20'
+                  ${
+                    difficulty === "advanced"
+                      ? "bg-gradient-to-r from-[#E5C17A] to-[#d4b86a] text-white shadow-lg hover:shadow-xl"
+                      : "border-[#E5C17A] text-[#2d3436] hover:bg-[#F7E6C3]/20"
                   }
                 `}
               >
@@ -127,7 +138,7 @@ export function LandingPage({ onStart, onAdminClick }: LandingPageProps) {
               </Button>
             </div>
           </div>
-          
+
           {/* Start Button */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -152,7 +163,7 @@ export function LandingPage({ onStart, onAdminClick }: LandingPageProps) {
               "
             >
               <span className="relative z-10 text-xl flex items-center gap-2">
-                開始測驗 
+                開始測驗
                 <motion.span
                   animate={{ rotate: [0, 15, -15, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
@@ -164,7 +175,7 @@ export function LandingPage({ onStart, onAdminClick }: LandingPageProps) {
             </Button>
           </motion.div>
         </motion.div>
-        
+
         {/* Footer */}
         <motion.footer
           initial={{ opacity: 0 }}
@@ -172,11 +183,25 @@ export function LandingPage({ onStart, onAdminClick }: LandingPageProps) {
           transition={{ duration: 0.8, delay: 1 }}
           className="mt-16 text-center text-sm text-[#636e72] space-x-4"
         >
-          <span className="hover:text-[#A8CBB7] cursor-pointer transition-colors">關於本站</span>
+          <span
+            className="hover:text-[#A8CBB7] cursor-pointer transition-colors"
+            onClick={onAboutClick}
+          >
+            關於本站
+          </span>
           <span>｜</span>
-          <span className="hover:text-[#A8CBB7] cursor-pointer transition-colors">隱私政策</span>
+          <span
+            className="hover:text-[#E5C17A] cursor-pointer transition-colors"
+            onClick={onLeaderboardClick}
+          >
+            榮耀排行榜
+          </span>
           <span>｜</span>
-          <span 
+          <span className="hover:text-[#A8CBB7] cursor-pointer transition-colors">
+            隱私政策
+          </span>
+          <span>｜</span>
+          <span
             className="hover:text-[#A8CBB7] cursor-pointer transition-colors"
             onClick={onAdminClick}
           >

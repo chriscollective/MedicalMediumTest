@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -9,11 +9,28 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
+import { Checkbox } from '../components/ui/checkbox';
 import { NatureAccents } from '../components/NatureAccents';
-import { ArrowLeft, Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, Search, Loader2 } from 'lucide-react';
+import { fetchQuestions, createQuestion, updateQuestion, deleteQuestion } from '../services/questionService';
+import { getQuestionsStats, QuestionStats } from '../services/analyticsService';
+import { BOOKS, DIFFICULTIES } from '../constants/books';
 
 interface QuestionBankProps {
   onBack: () => void;
+}
+
+interface ApiQuestion {
+  _id: string;
+  question: string;
+  type: 'single' | 'multiple' | 'fill';
+  options?: string[];
+  fillOptions?: string[];
+  correctAnswer: number | number[];
+  book: string;
+  difficulty: string;
+  source?: string;
+  explanation?: string;
 }
 
 interface QuestionData {
@@ -21,71 +38,259 @@ interface QuestionData {
   question: string;
   type: '單選' | '多選' | '填空';
   book: string;
-  difficulty: '初階' | '進階';
-  accuracy: number;
+  difficulty: string;
+  options?: string[];
+  fillOptions?: string[];
+  correctAnswer: number | number[];
+  source?: string;
+  explanation?: string;
 }
 
-const mockQuestions: QuestionData[] = [
-  { id: 'Q001', question: '哪種水果最能幫助肝臟排毒？', type: '單選', book: '搶救肝臟', difficulty: '初階', accuracy: 94 },
-  { id: 'Q002', question: '以下哪些是重金屬排毒五大天王？', type: '多選', book: '改變生命的食物', difficulty: '進階', accuracy: 78 },
-  { id: 'Q003', question: '肝臟最需要的營養素是______。', type: '填空', book: '搶救肝臟', difficulty: '初階', accuracy: 85 },
-  { id: 'Q004', question: '以下哪個不是安東尼建議的晨間淨化飲品？', type: '單選', book: '神奇西芹汁', difficulty: '初階', accuracy: 91 },
-  { id: 'Q005', question: '野生藍莓對大腦的主要療癒作用是？', type: '單選', book: '改變生命的食物', difficulty: '進階', accuracy: 67 }
-];
+const typeMapping: Record<string, '單選' | '多選' | '填空'> = {
+  'single': '單選',
+  'multiple': '多選',
+  'fill': '填空'
+};
+
+const reverseTypeMapping: Record<'單選' | '多選' | '填空', 'single' | 'multiple' | 'fill'> = {
+  '單選': 'single',
+  '多選': 'multiple',
+  '填空': 'fill'
+};
 
 export function QuestionBank({ onBack }: QuestionBankProps) {
-  const [questions, setQuestions] = useState<QuestionData[]>(mockQuestions);
+  const [questions, setQuestions] = useState<QuestionData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBook, setFilterBook] = useState<string>('all');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<QuestionData | null>(null);
-  
+  const [saving, setSaving] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+  const [stats, setStats] = useState<Map<string, QuestionStats>>(new Map());
+
   const [formData, setFormData] = useState({
     book: '',
-    chapter: '',
     difficulty: '初階',
-    type: '單選',
+    type: '單選' as '單選' | '多選' | '填空',
     question: '',
     options: ['', '', '', ''],
-    correctAnswer: '',
+    fillOptions: ['', '', '', '', '', ''],
+    correctAnswer: [] as number[],
+    singleCorrectAnswer: 0,
     explanation: '',
-    page: ''
+    source: ''
   });
-  
+
+  // Load questions from API
+  useEffect(() => {
+    loadQuestions();
+  }, []);
+
+  const loadQuestions = async () => {
+    try {
+      setLoading(true);
+      const apiQuestions = await fetchQuestions({ limit: 1000 });
+
+      // Convert API format to UI format
+      const uiQuestions: QuestionData[] = apiQuestions.map((q: ApiQuestion) => ({
+        id: q._id,
+        question: q.question,
+        type: typeMapping[q.type],
+        book: q.book,
+        difficulty: q.difficulty,
+        options: q.options,
+        fillOptions: q.fillOptions,
+        correctAnswer: q.correctAnswer,
+        source: q.source,
+        explanation: q.explanation
+      }));
+
+      setQuestions(uiQuestions);
+
+      // 載入統計資料
+      if (uiQuestions.length > 0) {
+        try {
+          const questionIds = uiQuestions.map(q => q.id);
+          const statsData = await getQuestionsStats(questionIds);
+
+          // 轉換為 Map 方便查詢
+          const statsMap = new Map<string, QuestionStats>();
+          statsData.forEach(stat => {
+            statsMap.set(stat.questionId, stat);
+          });
+
+          setStats(statsMap);
+        } catch (statsError) {
+          console.error('載入統計資料失敗:', statsError);
+          // 不影響題目顯示，只是沒有統計資料
+        }
+      }
+    } catch (error) {
+      console.error('載入題目失敗:', error);
+      alert('載入題目失敗，請稍後再試');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredQuestions = questions.filter(q => {
     const matchesSearch = q.question.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesBook = filterBook === 'all' || q.book === filterBook;
     const matchesDifficulty = filterDifficulty === 'all' || q.difficulty === filterDifficulty;
-    return matchesSearch && matchesBook && matchesDifficulty;
+    const matchesType = filterType === 'all' || q.type === filterType;
+    return matchesSearch && matchesBook && matchesDifficulty && matchesType;
   });
-  
-  const handleDelete = (id: string) => {
+
+  // Pagination
+  const totalPages = Math.ceil(filteredQuestions.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentQuestions = filteredQuestions.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterBook, filterDifficulty, filterType]);
+
+  const handleDelete = async (id: string) => {
     if (confirm('確定要刪除此題目嗎？')) {
-      setQuestions(prev => prev.filter(q => q.id !== id));
+      try {
+        await deleteQuestion(id);
+        setQuestions(prev => prev.filter(q => q.id !== id));
+        alert('刪除成功！');
+      } catch (error) {
+        console.error('刪除失敗:', error);
+        alert('刪除失敗，請稍後再試');
+      }
     }
   };
-  
+
   const handleEdit = (question: QuestionData) => {
     setEditingQuestion(question);
+
+    // Populate form data for editing
+    let correctAnswerArray: number[] = [];
+    let singleAnswer = 0;
+
+    if (question.type === '多選') {
+      correctAnswerArray = Array.isArray(question.correctAnswer) ? question.correctAnswer : [];
+    } else {
+      singleAnswer = typeof question.correctAnswer === 'number' ? question.correctAnswer : 0;
+    }
+
+    setFormData({
+      book: question.book,
+      difficulty: question.difficulty,
+      type: question.type,
+      question: question.question,
+      options: question.options || ['', '', '', ''],
+      fillOptions: question.fillOptions || ['', '', '', '', '', ''],
+      correctAnswer: correctAnswerArray,
+      singleCorrectAnswer: singleAnswer,
+      explanation: question.explanation || '',
+      source: question.source || ''
+    });
+
     setIsDialogOpen(true);
   };
-  
-  const handleSave = () => {
-    // Mock save functionality
-    setIsDialogOpen(false);
-    setEditingQuestion(null);
+
+  const resetForm = () => {
     setFormData({
       book: '',
-      chapter: '',
       difficulty: '初階',
       type: '單選',
       question: '',
       options: ['', '', '', ''],
-      correctAnswer: '',
+      fillOptions: ['', '', '', '', '', ''],
+      correctAnswer: [],
+      singleCorrectAnswer: 0,
       explanation: '',
-      page: ''
+      source: ''
     });
+    setEditingQuestion(null);
+  };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+
+      // Validate form
+      if (!formData.book || !formData.question) {
+        alert('請填寫書籍和題目內容');
+        return;
+      }
+
+      const apiType = reverseTypeMapping[formData.type];
+      let apiCorrectAnswer: number | number[];
+      let apiOptions: string[] | undefined;
+      let apiFillOptions: string[] | undefined;
+
+      if (formData.type === '單選') {
+        apiCorrectAnswer = formData.singleCorrectAnswer;
+        apiOptions = formData.options.filter(opt => opt.trim() !== '');
+        if (apiOptions.length < 2) {
+          alert('單選題至少需要2個選項');
+          return;
+        }
+      } else if (formData.type === '多選') {
+        apiCorrectAnswer = formData.correctAnswer;
+        apiOptions = formData.options.filter(opt => opt.trim() !== '');
+        if (apiOptions.length < 2) {
+          alert('多選題至少需要2個選項');
+          return;
+        }
+        if (formData.correctAnswer.length === 0) {
+          alert('請至少選擇一個正確答案');
+          return;
+        }
+      } else {
+        // Fill type
+        apiCorrectAnswer = formData.singleCorrectAnswer;
+        apiFillOptions = formData.fillOptions.filter(opt => opt.trim() !== '');
+        if (apiFillOptions.length < 2) {
+          alert('填空題至少需要2個選項');
+          return;
+        }
+      }
+
+      const questionData = {
+        type: apiType,
+        question: formData.question,
+        options: apiOptions,
+        fillOptions: apiFillOptions,
+        correctAnswer: apiCorrectAnswer,
+        difficulty: formData.difficulty,
+        book: formData.book,
+        source: formData.source || undefined,
+        explanation: formData.explanation || undefined
+      };
+
+      if (editingQuestion) {
+        // Update existing question
+        await updateQuestion(editingQuestion.id, questionData);
+        alert('更新成功！');
+      } else {
+        // Create new question
+        await createQuestion(questionData);
+        alert('新增成功！');
+      }
+
+      // Reload questions
+      await loadQuestions();
+
+      // Close dialog and reset form
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error('儲存失敗:', error);
+      alert('儲存失敗，請稍後再試');
+    } finally {
+      setSaving(false);
+    }
   };
   
   return (
@@ -109,7 +314,10 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
               <h2 className="text-[#2d3436]">題庫管理</h2>
             </div>
             
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) resetForm();
+            }}>
               <DialogTrigger asChild>
                 <Button className="bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white">
                   <Plus className="w-4 h-4 mr-2" />
@@ -123,76 +331,63 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                     填寫題目相關資訊，完成後點擊儲存
                   </DialogDescription>
                 </DialogHeader>
-                
+
                 <div className="space-y-4 py-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>書籍</Label>
+                      <Label>書籍 *</Label>
                       <Select value={formData.book} onValueChange={(v) => setFormData({...formData, book: v})}>
                         <SelectTrigger>
                           <SelectValue placeholder="選擇書籍" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="celery">神奇西芹汁</SelectItem>
-                          <SelectItem value="liver">搶救肝臟</SelectItem>
-                          <SelectItem value="food">改變生命的食物</SelectItem>
+                          {BOOKS.map(book => (
+                            <SelectItem key={book.db} value={book.db}>{book.display}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div className="space-y-2">
-                      <Label>章節</Label>
-                      <Input 
-                        placeholder="例如：第3章" 
-                        value={formData.chapter}
-                        onChange={(e) => setFormData({...formData, chapter: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>難度</Label>
+                      <Label>難度 *</Label>
                       <RadioGroup value={formData.difficulty} onValueChange={(v) => setFormData({...formData, difficulty: v})}>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="初階" id="beginner" />
-                          <Label htmlFor="beginner">初階</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="進階" id="advanced" />
-                          <Label htmlFor="advanced">進階</Label>
-                        </div>
+                        {DIFFICULTIES.map(diff => (
+                          <div key={diff.db} className="flex items-center space-x-2">
+                            <RadioGroupItem value={diff.db} id={diff.key} />
+                            <Label htmlFor={diff.key}>{diff.display}</Label>
+                          </div>
+                        ))}
                       </RadioGroup>
                     </div>
-                    
-                    <div className="space-y-2">
-                      <Label>題型</Label>
-                      <Select value={formData.type} onValueChange={(v) => setFormData({...formData, type: v})}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="單選">單選題</SelectItem>
-                          <SelectItem value="多選">多選題</SelectItem>
-                          <SelectItem value="填空">填空題</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label>題目內容</Label>
-                    <Textarea 
-                      placeholder="輸入題目..." 
+                    <Label>題型 *</Label>
+                    <Select value={formData.type} onValueChange={(v) => setFormData({...formData, type: v as '單選' | '多選' | '填空'})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="單選">單選題</SelectItem>
+                        <SelectItem value="多選">多選題</SelectItem>
+                        <SelectItem value="填空">填空題</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>題目內容 *</Label>
+                    <Textarea
+                      placeholder="輸入題目..."
                       value={formData.question}
                       onChange={(e) => setFormData({...formData, question: e.target.value})}
                       rows={3}
                     />
                   </div>
-                  
+
                   {(formData.type === '單選' || formData.type === '多選') && (
                     <div className="space-y-2">
-                      <Label>選項</Label>
+                      <Label>選項 *</Label>
                       {formData.options.map((opt, idx) => (
                         <Input
                           key={idx}
@@ -207,48 +402,110 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                       ))}
                     </div>
                   )}
-                  
+
+                  {formData.type === '填空' && (
+                    <div className="space-y-2">
+                      <Label>填空選項 *</Label>
+                      {formData.fillOptions.map((opt, idx) => (
+                        <Input
+                          key={idx}
+                          placeholder={`選項 ${idx + 1}`}
+                          value={opt}
+                          onChange={(e) => {
+                            const newFillOptions = [...formData.fillOptions];
+                            newFillOptions[idx] = e.target.value;
+                            setFormData({...formData, fillOptions: newFillOptions});
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+
                   <div className="space-y-2">
-                    <Label>正確答案</Label>
-                    <Input 
-                      placeholder="輸入正確答案" 
-                      value={formData.correctAnswer}
-                      onChange={(e) => setFormData({...formData, correctAnswer: e.target.value})}
-                    />
+                    <Label>正確答案 *</Label>
+                    {formData.type === '單選' && (
+                      <RadioGroup value={String(formData.singleCorrectAnswer)} onValueChange={(v) => setFormData({...formData, singleCorrectAnswer: parseInt(v)})}>
+                        {formData.options.map((opt, idx) => opt.trim() && (
+                          <div key={idx} className="flex items-center space-x-2">
+                            <RadioGroupItem value={String(idx)} id={`answer-${idx}`} />
+                            <Label htmlFor={`answer-${idx}`}>{opt || `選項 ${idx + 1}`}</Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    )}
+                    {formData.type === '多選' && (
+                      <div className="space-y-2">
+                        {formData.options.map((opt, idx) => opt.trim() && (
+                          <div key={idx} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`answer-${idx}`}
+                              checked={formData.correctAnswer.includes(idx)}
+                              onCheckedChange={(checked) => {
+                                const newAnswers = checked
+                                  ? [...formData.correctAnswer, idx]
+                                  : formData.correctAnswer.filter(a => a !== idx);
+                                setFormData({...formData, correctAnswer: newAnswers});
+                              }}
+                            />
+                            <Label htmlFor={`answer-${idx}`}>{opt || `選項 ${idx + 1}`}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {formData.type === '填空' && (
+                      <RadioGroup value={String(formData.singleCorrectAnswer)} onValueChange={(v) => setFormData({...formData, singleCorrectAnswer: parseInt(v)})}>
+                        {formData.fillOptions.map((opt, idx) => opt.trim() && (
+                          <div key={idx} className="flex items-center space-x-2">
+                            <RadioGroupItem value={String(idx)} id={`answer-${idx}`} />
+                            <Label htmlFor={`answer-${idx}`}>{opt || `選項 ${idx + 1}`}</Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    )}
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label>解析</Label>
-                    <Textarea 
-                      placeholder="解釋為什麼這是正確答案..." 
+                    <Textarea
+                      placeholder="解釋為什麼這是正確答案..."
                       value={formData.explanation}
                       onChange={(e) => setFormData({...formData, explanation: e.target.value})}
                       rows={3}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label>頁碼</Label>
-                    <Input 
-                      placeholder="例如：p.52" 
-                      value={formData.page}
-                      onChange={(e) => setFormData({...formData, page: e.target.value})}
+                    <Label>來源</Label>
+                    <Input
+                      placeholder="例如：《搶救肝臟》第3章"
+                      value={formData.source}
+                      onChange={(e) => setFormData({...formData, source: e.target.value})}
                     />
                   </div>
-                  
+
                   <div className="flex justify-end gap-2 pt-4">
                     <Button
                       variant="outline"
-                      onClick={() => setIsDialogOpen(false)}
+                      onClick={() => {
+                        setIsDialogOpen(false);
+                        resetForm();
+                      }}
                       className="border-[#A8CBB7]"
+                      disabled={saving}
                     >
                       取消
                     </Button>
                     <Button
                       onClick={handleSave}
                       className="bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white"
+                      disabled={saving}
                     >
-                      儲存
+                      {saving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          儲存中...
+                        </>
+                      ) : '儲存'}
                     </Button>
                   </div>
                 </div>
@@ -304,84 +561,164 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                     <SelectItem value="進階">進階</SelectItem>
                   </SelectContent>
                 </Select>
+
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="題型" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">全部題型</SelectItem>
+                    <SelectItem value="單選">單選題</SelectItem>
+                    <SelectItem value="多選">多選題</SelectItem>
+                    <SelectItem value="填空">填空題</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               {/* Table */}
-              <div className="rounded-lg border border-[#A8CBB7]/20 overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-[#F7E6C3]/20 border-[#A8CBB7]/20">
-                      <TableHead>題號</TableHead>
-                      <TableHead>題目內容</TableHead>
-                      <TableHead>題型</TableHead>
-                      <TableHead>書籍</TableHead>
-                      <TableHead>難度</TableHead>
-                      <TableHead>答對率</TableHead>
-                      <TableHead className="text-right">操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredQuestions.map((q) => (
-                      <TableRow key={q.id} className="border-[#A8CBB7]/20">
-                        <TableCell>{q.id}</TableCell>
-                        <TableCell className="max-w-md">{q.question}</TableCell>
-                        <TableCell>
-                          <span className="px-2 py-1 bg-[#A8CBB7]/20 rounded text-sm">
-                            {q.type}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="px-2 py-1 bg-[#F7E6C3]/50 rounded text-sm">
-                            {q.book}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`
-                            px-2 py-1 rounded text-sm
-                            ${q.difficulty === '初階' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}
-                          `}>
-                            {q.difficulty}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`
-                            px-2 py-1 rounded text-sm
-                            ${q.accuracy < 60 ? 'bg-red-100 text-red-700' : 
-                              q.accuracy < 80 ? 'bg-yellow-100 text-yellow-700' : 
-                              'bg-green-100 text-green-700'}
-                          `}>
-                            {q.accuracy}%
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEdit(q)}
-                              className="text-[#A8CBB7] hover:bg-[#F7E6C3]/20"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(q.id)}
-                              className="text-red-500 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              
-              <div className="text-sm text-[#636e72] text-center pt-4">
-                共 {filteredQuestions.length} 筆題目
-              </div>
+              {loading ? (
+                <div className="flex justify-center items-center py-20">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#A8CBB7]" />
+                  <span className="ml-3 text-[#636e72]">載入中...</span>
+                </div>
+              ) : (
+                <>
+                  <div className="rounded-lg border border-[#A8CBB7]/20 overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-[#F7E6C3]/20 border-[#A8CBB7]/20">
+                          <TableHead className="w-32">題號</TableHead>
+                          <TableHead>題目內容</TableHead>
+                          <TableHead>題型</TableHead>
+                          <TableHead>書籍</TableHead>
+                          <TableHead>難度</TableHead>
+                          <TableHead>正確率</TableHead>
+                          <TableHead className="text-right">操作</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {currentQuestions.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8 text-[#636e72]">
+                              沒有找到題目
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          currentQuestions.map((q, index) => (
+                            <TableRow key={q.id} className="border-[#A8CBB7]/20">
+                              <TableCell className="font-mono text-sm">#{startIndex + index + 1}</TableCell>
+                              <TableCell className="max-w-md">
+                                <div className="truncate" title={q.question}>
+                                  {q.question}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <span className="px-2 py-1 bg-[#A8CBB7]/20 rounded text-sm">
+                                  {q.type}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <span className="px-2 py-1 bg-[#F7E6C3]/50 rounded text-sm">
+                                  {q.book}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <span className={`
+                                  px-2 py-1 rounded text-sm
+                                  ${q.difficulty === '初階' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}
+                                `}>
+                                  {q.difficulty}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                {(() => {
+                                  const stat = stats.get(q.id);
+                                  if (!stat || stat.totalAnswers === 0) {
+                                    return (
+                                      <span className="text-[#636e72] text-sm">尚無統計資料</span>
+                                    );
+                                  }
+                                  return (
+                                    <div className="flex flex-col gap-1">
+                                      <span className={`
+                                        font-semibold
+                                        ${stat.correctRate >= 80 ? 'text-green-600' :
+                                          stat.correctRate >= 60 ? 'text-blue-600' :
+                                          stat.correctRate >= 40 ? 'text-orange-600' :
+                                          'text-red-600'}
+                                      `}>
+                                        {stat.correctRate}%
+                                      </span>
+                                      <span className="text-xs text-[#636e72]">
+                                        ({stat.correctAnswers}/{stat.totalAnswers})
+                                      </span>
+                                    </div>
+                                  );
+                                })()}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleEdit(q)}
+                                    className="text-[#A8CBB7] hover:bg-[#F7E6C3]/20"
+                                  >
+                                    <Pencil className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleDelete(q.id)}
+                                    className="text-red-500 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Pagination Controls */}
+                  <div className="flex items-center justify-between pt-4">
+                    <div className="text-sm text-[#636e72]">
+                      共 {filteredQuestions.length} 筆題目，顯示第 {startIndex + 1} - {Math.min(endIndex, filteredQuestions.length)} 筆
+                    </div>
+
+                    {totalPages > 1 && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          disabled={currentPage === 1}
+                          className="border-[#A8CBB7] text-[#A8CBB7] hover:bg-[#A8CBB7] hover:text-white disabled:opacity-50"
+                        >
+                          上一頁
+                        </Button>
+
+                        <span className="text-sm text-[#636e72] px-3">
+                          第 {currentPage} / {totalPages} 頁
+                        </span>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                          disabled={currentPage === totalPages}
+                          className="border-[#A8CBB7] text-[#A8CBB7] hover:bg-[#A8CBB7] hover:text-white disabled:opacity-50"
+                        >
+                          下一頁
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>

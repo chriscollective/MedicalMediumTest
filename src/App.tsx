@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { QuizPage } from './pages/QuizPage';
 import { ResultPage } from './pages/ResultPage';
@@ -6,16 +6,21 @@ import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { Analytics } from './pages/Analytics';
 import { QuestionBank } from './pages/QuestionBank';
+import { Leaderboard } from './pages/Leaderboard';
+import { About } from './pages/About';
 import { Question } from './components/QuestionCard';
+import { getToken, getCurrentUser } from './services/authService';
 
-type AppPage = 
-  | 'landing' 
-  | 'quiz' 
-  | 'result' 
-  | 'admin-login' 
-  | 'admin-dashboard' 
-  | 'analytics' 
-  | 'questions';
+type AppPage =
+  | 'landing'
+  | 'quiz'
+  | 'result'
+  | 'admin-login'
+  | 'admin-dashboard'
+  | 'analytics'
+  | 'questions'
+  | 'leaderboard'
+  | 'about';
 
 interface QuizState {
   books: string[];
@@ -207,6 +212,24 @@ function App() {
     wrongQuestions: []
   });
   const [adminUser, setAdminUser] = useState<string>('');
+  const [leaderboardSource, setLeaderboardSource] = useState<'landing' | 'admin-dashboard'>('landing');
+
+  // Check if user is already logged in on page load
+  useEffect(() => {
+    const token = getToken();
+    const currentUser = getCurrentUser();
+
+    if (token && currentUser) {
+      setAdminUser(currentUser.username);
+      // Restore the admin page from localStorage if available
+      const savedPage = localStorage.getItem('adminCurrentPage');
+      if (savedPage && (savedPage === 'admin-dashboard' || savedPage === 'analytics' || savedPage === 'questions')) {
+        setCurrentPage(savedPage as AppPage);
+      } else {
+        setCurrentPage('admin-dashboard');
+      }
+    }
+  }, []);
 
   const handleStartQuiz = (books: string[], difficulty: 'beginner' | 'advanced') => {
     setQuizState({
@@ -220,43 +243,18 @@ function App() {
     setCurrentPage('quiz');
   };
 
-  const handleQuizComplete = (answers: Record<string, string | string[]>) => {
-    // Calculate score
-    let score = 0;
-    const wrongQuestions: Array<{ question: Question; userAnswer: string | string[] }> = [];
-
-    mockQuestions.forEach((question) => {
-      const userAnswer = answers[question.id];
-      const correctAnswer = question.correctAnswer;
-
-      if (question.type === 'multiple') {
-        // For multiple choice, check if arrays are equal
-        const userArr = (userAnswer as string[]) || [];
-        const correctArr = correctAnswer as string[];
-        const isCorrect = 
-          userArr.length === correctArr.length &&
-          userArr.every(a => correctArr.includes(a));
-        
-        if (isCorrect) {
-          score++;
-        } else {
-          wrongQuestions.push({ question, userAnswer });
-        }
-      } else {
-        // For single and fill, direct comparison
-        if (userAnswer === correctAnswer) {
-          score++;
-        } else {
-          wrongQuestions.push({ question, userAnswer });
-        }
-      }
-    });
-
+  const handleQuizComplete = (result: {
+    score: number;
+    totalQuestions: number;
+    wrongQuestions: Array<{ question: Question; userAnswer: string | string[] }>;
+    answers: Record<string, string | string[]>;
+  }) => {
     setQuizState(prev => ({
       ...prev,
-      answers,
-      score,
-      wrongQuestions
+      answers: result.answers,
+      score: result.score,
+      totalQuestions: result.totalQuestions,
+      wrongQuestions: result.wrongQuestions
     }));
     setCurrentPage('result');
   };
@@ -268,23 +266,37 @@ function App() {
   const handleAdminLogin = (username: string) => {
     setAdminUser(username);
     setCurrentPage('admin-dashboard');
+    // Save the dashboard page to localStorage
+    localStorage.setItem('adminCurrentPage', 'admin-dashboard');
   };
 
   const handleAdminLogout = () => {
     setAdminUser('');
     setCurrentPage('landing');
+    // Clear the saved admin page from localStorage
+    localStorage.removeItem('adminCurrentPage');
   };
 
-  const handleAdminNavigate = (page: 'analytics' | 'questions') => {
+  const handleAdminNavigate = (page: 'analytics' | 'questions' | 'leaderboard') => {
+    if (page === 'leaderboard') {
+      setLeaderboardSource('admin-dashboard');
+    }
     setCurrentPage(page);
+    // Save the current admin page to localStorage
+    localStorage.setItem('adminCurrentPage', page);
   };
 
   return (
     <div className="min-h-screen">
       {currentPage === 'landing' && (
-        <LandingPage 
+        <LandingPage
           onStart={handleStartQuiz}
           onAdminClick={() => setCurrentPage('admin-login')}
+          onLeaderboardClick={() => {
+            setLeaderboardSource('landing');
+            setCurrentPage('leaderboard');
+          }}
+          onAboutClick={() => setCurrentPage('about')}
         />
       )}
 
@@ -302,13 +314,19 @@ function App() {
           score={quizState.score}
           totalQuestions={quizState.totalQuestions}
           wrongQuestions={quizState.wrongQuestions}
+          books={quizState.books}
+          difficulty={quizState.difficulty}
+          userId={localStorage.getItem('quizUserId') || `user_${Date.now()}`}
           onRestart={handleRestartQuiz}
           onHome={() => setCurrentPage('landing')}
         />
       )}
 
       {currentPage === 'admin-login' && (
-        <AdminLogin onLogin={handleAdminLogin} />
+        <AdminLogin
+          onLogin={handleAdminLogin}
+          onBack={() => setCurrentPage('landing')}
+        />
       )}
 
       {currentPage === 'admin-dashboard' && (
@@ -325,6 +343,14 @@ function App() {
 
       {currentPage === 'questions' && (
         <QuestionBank onBack={() => setCurrentPage('admin-dashboard')} />
+      )}
+
+      {currentPage === 'leaderboard' && (
+        <Leaderboard onBack={() => setCurrentPage(leaderboardSource)} />
+      )}
+
+      {currentPage === 'about' && (
+        <About onBack={() => setCurrentPage('landing')} />
       )}
     </div>
   );

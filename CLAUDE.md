@@ -148,3 +148,9 @@ QuizPage 每頁顯示 5 題，包含：
 
 此專案是從 Figma 設計生成的，可在以下位置查看：
 https://www.figma.com/design/a3i2fvV92IFl19Lom9aKXH/醫療靈媒隨堂測驗介面設計
+
+## Active Technologies
+- MongoDB Atlas (雲端托管) (001-database-question-bank)
+
+## Recent Changes
+- 001-database-question-bank: Added MongoDB Atlas (雲端托管)
