@@ -22,8 +22,7 @@ const bookSchema = new Schema<IBook>(
   }
 );
 
-// 建立索引以提升查詢效能
-bookSchema.index({ name: 1 });
+// 注意：name 欄位的 unique: true 已經自動建立了唯一索引，無需重複定義
 
 const Book = mongoose.model<IBook>('Book', bookSchema);
 
