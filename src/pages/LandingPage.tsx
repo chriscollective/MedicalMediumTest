@@ -193,7 +193,7 @@ export function LandingPage({
           </span>
           <span>｜</span>
           <span
-            className="hover:text-[#E5C17A] cursor-pointer transition-colors"
+            className="hover:text-[#A8CBB7]  cursor-pointer transition-colors"
             onClick={onLeaderboardClick}
           >
             榮耀排行榜

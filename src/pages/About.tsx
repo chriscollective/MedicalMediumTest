@@ -129,7 +129,7 @@ export function About({ onBack }: AboutProps) {
           <div className="flex justify-center pt-2">
             <Button
               onClick={onBack}
-              className="px-8 py-6 rounded-2xl bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white shadow-lg hover:shadow-xl"
+              className="px-8 py-6 cursor-pointer rounded-2xl bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white shadow-lg hover:shadow-xl"
             >
               <ArrowLeft className="w-4 h-4 mr-2" /> 返回首頁
             </Button>

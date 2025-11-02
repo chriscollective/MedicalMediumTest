@@ -9,6 +9,10 @@ import {
   getAllLeaderboards,
   LeaderboardEntry,
 } from "../services/leaderboardService";
+import { NaturalPattern } from "../components/NaturalPattern";
+import { NatureDecoration } from "../components/NatureDecoration";
+import { FloatingHerbs } from "../components/FloatingHerbs";
+import { Sparkles } from "lucide-react";
 
 interface LeaderboardProps {
   onBack: () => void;
@@ -86,27 +90,36 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
   const currentLeaderboard = leaderboards[activeTab] || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAFAF7] to-[#F7E6C3]/20 relative overflow-hidden">
-      {/* Nature Accents */}
-      <NatureAccents variant="minimal" />
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10 pb-100">
+      {/* Background blur effect */}
+      <div
+        className="absolute inset-0 opacity-30"
+        style={{
+          backgroundImage: `url('https://images.unsplash.com/photo-1604248215430-100912b27ead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwbmF0dXJlJTIwbGVhdmVzJTIwbGlnaHR8ZW58MXx8fHwxNzYxODA3MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(60px)",
+        }}
+      />
 
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg shadow-sm border-b border-[#A8CBB7]/20">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={onBack}
-              variant="ghost"
-              className="text-[#A8CBB7] hover:bg-[#F7E6C3]/20"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              返回
-            </Button>
-            <div className="flex items-center gap-3">
-              <Trophy className="w-7 h-7 text-[#E5C17A]" />
-              <h1 className="text-2xl font-bold text-[#2d3436]">榮耀排行榜</h1>
+      {/* Nature Decorations */}
+      <NaturalPattern />
+      <NatureDecoration />
+      <FloatingHerbs />
+
+      {/* 透明頂部列（置中標題） */}
+      <div className="relative z-10 bg-transparent pt-100  ">
+        <div className="container mx-auto px-4 py-16 relative">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="flex items-center gap-2 text-[#2d3436]">
+              <Sparkles className="w-6 h-6 text-[#A8CBB7]" />
+              <span className="text-3xl font-extrabold bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-400 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(251,191,36,0.6)] animate-pulse ">
+                榮耀排行榜
+              </span>
+              <Sparkles className="w-6 h-6 text-[#A8CBB7]" />
             </div>
           </div>
+          <div className="flex items-center justify-end"></div>
         </div>
       </div>
 
@@ -188,12 +201,12 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                         transition-all duration-300 hover:scale-102
                         ${
                           entry.rank === 1
-                            ? "bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-400 shadow-2xl shadow-amber-500/50"
+                            ? "bg-gradient-to-r bg-white/80   from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-400 shadow-2xl shadow-amber-500/50"
                             : entry.rank === 2
-                            ? "bg-gradient-to-r from-slate-100 via-gray-50 to-slate-100 border-2 border-slate-400 shadow-xl shadow-slate-400/40"
+                            ? "bg-gradient-to-r bg-white/80 from-slate-100 via-gray-50 to-slate-100 border-2 border-slate-400 shadow-xl shadow-slate-400/40"
                             : entry.rank === 3
-                            ? "bg-gradient-to-r from-orange-100 via-amber-50 to-orange-100 border-2 border-orange-400 shadow-lg shadow-orange-400/30"
-                            : "bg-[#FAFAF7]/50 border border-[#A8CBB7]/10"
+                            ? "bg-gradient-to-r bg-white/80 from-orange-100 via-amber-50 to-orange-100 border-2 border-orange-400 shadow-lg shadow-orange-400/30"
+                            : "bg-white/80 border border-[#A8CBB7]/10"
                         }
                       `}
                     >
@@ -252,7 +265,7 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                             animate={{
                               boxShadow: [
                                 "0 0 20px 5px rgba(251, 191, 36, 0.3)",
-                                "0 0 40px 10px rgba(251, 191, 36, 0.5)",
+                                "0 0 40px 10px rgba(251, 190, 36, 0.6)",
                                 "0 0 20px 5px rgba(251, 191, 36, 0.3)",
                               ],
                             }}
@@ -297,9 +310,14 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                             className="absolute inset-0 rounded-xl pointer-events-none"
                             animate={{
                               boxShadow: [
-                                "0 0 15px 3px rgba(148, 163, 184, 0.3)",
-                                "0 0 30px 8px rgba(148, 163, 184, 0.4)",
-                                "0 0 15px 3px rgba(148, 163, 184, 0.3)",
+                                //金色光環
+                                // "0 0 20px 5px rgba(251, 191, 36, 0.3)",
+                                // "0 0 40px 10px rgba(251, 191, 36, 0.5)",
+                                // "0 0 20px 5px rgba(251, 191, 36, 0.3)",
+                                //銀色光環
+                                "0 0 25px 8px rgba(148, 163, 184, 0.4)",
+                                "0 0 50px 15px rgba(99, 141, 199, 0.5)",
+                                "0 0 25px 8px rgba(148, 163, 184, 0.4)",
                               ],
                             }}
                             transition={{
@@ -320,18 +338,6 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                               ease: "easeInOut",
                             }}
                           />
-                          {/* 掃光效果 */}
-                          <motion.div
-                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-xl pointer-events-none"
-                            animate={{
-                              x: ["-100%", "200%"],
-                            }}
-                            transition={{
-                              duration: 4,
-                              repeat: Infinity,
-                              ease: "linear",
-                            }}
-                          />
                         </>
                       )}
 
@@ -343,9 +349,14 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                             className="absolute inset-0 rounded-xl pointer-events-none"
                             animate={{
                               boxShadow: [
-                                "0 0 10px 2px rgba(251, 146, 60, 0.2)",
-                                "0 0 20px 5px rgba(251, 146, 60, 0.3)",
-                                "0 0 10px 2px rgba(251, 146, 60, 0.2)",
+                                //金色光環
+                                // "0 0 20px 5px rgba(251, 191, 36, 0.3)",
+                                // "0 0 40px 10px rgba(251, 191, 36, 0.5)",
+                                // "0 0 20px 5px rgba(251, 191, 36, 0.3)",
+                                //銅色光環
+                                "0 0 20px 6px rgba(251, 146, 60, 0.3)",
+                                "0 0 40px 12px rgba(251, 146, 60, 0.45)",
+                                "0 0 20px 6px rgba(251, 146, 60, 0.3)",
                               ],
                             }}
                             transition={{
@@ -358,6 +369,39 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500 rounded-xl pointer-events-none" />
                         </>
                       )}
+                      {(entry.rank === 4 || entry.rank === 5) && (
+                        <>
+                          {/* 外層柔光暈 */}
+                          <motion.div
+                            className="absolute inset-0 rounded-xl pointer-events-none"
+                            animate={{
+                              boxShadow: [
+                                "0 0 15px 3px rgba(255, 255, 255, 0.25)",
+                                "0 0 30px 8px rgba(255, 255, 255, 0.68)",
+                                "0 0 15px 3px rgba(255, 255, 255, 0.25)",
+                              ],
+                            }}
+                            transition={{
+                              duration: 2.5,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            }}
+                          />
+
+                          {/* 內層光暈加厚 */}
+                          <motion.div
+                            className="absolute -inset-0.5 bg-gradient-to-r from-white/20 via-white/40 to-white/20 rounded-xl blur-sm pointer-events-none"
+                            animate={{
+                              opacity: [0.2, 0.4, 0.2],
+                            }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            }}
+                          />
+                        </>
+                      )}
                     </motion.div>
                   ))}
                 </div>
@@ -365,6 +409,18 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
             </CardContent>
           </Card>
         </motion.div>
+      </div>
+
+      <div
+        className="flex justify-center pb-20 pt-8 relative z-30 "
+        style={{ marginBottom: "80px" }}
+      >
+        <Button
+          onClick={onBack}
+          className="px-8 py-6 rounded-2xl cursor-pointer bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white shadow-lg hover:shadow-xl"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" /> 返回首頁
+        </Button>
       </div>
     </div>
   );

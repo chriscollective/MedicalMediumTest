@@ -19,7 +19,7 @@ interface PrivacyPolicyProps {
 
 export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
   return (
-    <div className="min-h-screen relative  bg-gradient-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
+    <div className="min-h-screen relative  overflow-hidden bg-gradient-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
       {/* 背景（沿用首頁） */}
       <div
         className="absolute inset-0 opacity-30 overflow-hidden"
@@ -52,7 +52,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
       </div>
 
       {/* 內容區塊（與頂部列拉開距離） */}
-      <div className="relative z-10 container mx-auto px-4 pt-28 pb-32 mb-40 md:pb-40 max-w-4xl">
+      <div className="relative z-10 container mx-auto px-4 pt-28 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 20 }}
@@ -320,10 +320,13 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             </CardContent>
           </Card>
 
-          <div className="flex justify-center pt-8 pb-8">
+          <div
+            className="flex justify-center pt-8 pb-8"
+            style={{ marginBottom: "80px" }}
+          >
             <Button
               onClick={onBack}
-              className="px-8 py-6 rounded-2xl bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white shadow-lg hover:shadow-xl"
+              className="px-8 py-6 rounded-2xl cursor-pointer bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white shadow-lg hover:shadow-xl"
             >
               <ArrowLeft className="w-4 h-4 mr-2" /> 返回首頁
             </Button>
