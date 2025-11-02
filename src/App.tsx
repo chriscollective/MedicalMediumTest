@@ -11,6 +11,7 @@ import { About } from "./pages/About";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { Question } from "./components/QuestionCard";
 import { getToken, getCurrentUser } from "./services/authService";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 
 type AppPage =
   | "landing"
@@ -210,6 +211,9 @@ function App() {
       {currentPage === "privacy-policy" && (
         <PrivacyPolicy onBack={() => setCurrentPage("landing")} />
       )}
+
+      {/* Vercel Analytics - 追蹤網站流量 */}
+      <VercelAnalytics />
     </div>
   );
 }
