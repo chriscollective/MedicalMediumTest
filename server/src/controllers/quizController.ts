@@ -89,7 +89,7 @@ export async function submitQuiz(req: Request, res: Response, next: NextFunction
 
     // 建立題目 Map 以便快速查找
     const questionMap = new Map(
-      questions.map(q => [q._id.toString(), q])
+      questions.map(q => [String(q._id), q])
     );
 
     // 處理每個答案，建立 bitmap

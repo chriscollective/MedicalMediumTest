@@ -17,14 +17,19 @@ async function clearQuizzes() {
     console.log(`✅ 已刪除 ${quizResult.deletedCount} 筆 Quiz 記錄`);
 
     // 刪除舊的 Answer 記錄（如果 collection 存在）
-    const collections = await mongoose.connection.db.listCollections().toArray();
-    const hasAnswers = collections.some(col => col.name === 'answers');
+    const db = mongoose.connection.db;
+    if (db) {
+      const collections = await db.listCollections().toArray();
+      const hasAnswers = collections.some(col => col.name === 'answers');
 
-    if (hasAnswers) {
-      const answerResult = await mongoose.connection.db.collection('answers').deleteMany({});
-      console.log(`✅ 已刪除 ${answerResult.deletedCount} 筆 Answer 記錄`);
+      if (hasAnswers) {
+        const answerResult = await db.collection('answers').deleteMany({});
+        console.log(`✅ 已刪除 ${answerResult.deletedCount} 筆 Answer 記錄`);
+      } else {
+        console.log('ℹ️  沒有找到 Answer collection');
+      }
     } else {
-      console.log('ℹ️  沒有找到 Answer collection');
+      console.log('⚠️  資料庫連接未建立');
     }
 
     console.log('\n✨ 清理完成！現在可以重新測驗，新的記錄會包含 bitmap 欄位。');

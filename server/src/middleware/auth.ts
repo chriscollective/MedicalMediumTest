@@ -43,7 +43,7 @@ export const authenticate = async (
 
     // Attach admin info to request
     req.admin = {
-      id: admin._id.toString(),
+      id: String(admin._id),
       username: admin.username,
       role: admin.role
     };
