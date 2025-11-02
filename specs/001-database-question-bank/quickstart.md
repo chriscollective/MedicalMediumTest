@@ -123,26 +123,26 @@ VITE_API_URL=http://localhost:5000/api
 更新 `vite.config.ts`：
 
 ```typescript
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
-    }
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
   server: {
     port: 3000,
     proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
-      }
-    }
-  }
+      "/api": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+      },
+    },
+  },
 });
 ```
 
@@ -159,6 +159,7 @@ export default defineConfig({
 ### 2. 設定資料庫存取
 
 1. **Database Access**：
+
    - 建立資料庫使用者
    - Username: `mmquiz_admin`（範例）
    - Password: 產生強密碼並記錄
@@ -172,34 +173,28 @@ export default defineConfig({
 1. 點選 "Connect" → "Connect your application"
 2. 選擇 Driver: Node.js, Version: 5.5 or later
 3. 複製連接字串：
-   ```
-   mongodb+srv://mmquiz_admin:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
-   ```
 4. 修改連接字串：
    - 替換 `<password>` 為實際密碼
    - 在 `mongodb.net/` 後加上資料庫名稱 `mmquiz`
    - 最終格式：
-     ```
-     mongodb+srv://mmquiz_admin:your_password@cluster0.xxxxx.mongodb.net/mmquiz?retryWrites=true&w=majority
-     ```
 
 ### 4. 測試連接
 
 建立測試腳本 `server/src/scripts/test-connection.ts`：
 
 ```typescript
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 async function testConnection() {
   try {
     await mongoose.connect(process.env.MONGODB_URI!);
-    console.log('✅ MongoDB connection successful!');
+    console.log("✅ MongoDB connection successful!");
     await mongoose.disconnect();
   } catch (error) {
-    console.error('❌ MongoDB connection failed:', error);
+    console.error("❌ MongoDB connection failed:", error);
   }
 }
 
@@ -282,14 +277,14 @@ src/
 **`server/src/config/database.ts`**:
 
 ```typescript
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 export async function connectDatabase() {
   try {
     await mongoose.connect(process.env.MONGODB_URI!);
-    console.log('✅ MongoDB connected');
+    console.log("✅ MongoDB connected");
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error("❌ MongoDB connection error:", error);
     process.exit(1);
   }
 }
@@ -298,6 +293,7 @@ export async function connectDatabase() {
 #### 1.2 建立 Mongoose 模型
 
 參考 `specs/001-database-question-bank/data-model.md` 建立：
+
 - `server/src/models/Question.ts`
 - `server/src/models/Quiz.ts`
 - `server/src/models/Answer.ts`
@@ -307,14 +303,14 @@ export async function connectDatabase() {
 **`server/src/server.ts`**:
 
 ```typescript
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { connectDatabase } from './config/database';
-import questionsRouter from './routes/questions';
-import quizzesRouter from './routes/quizzes';
-import analyticsRouter from './routes/analytics';
-import { errorHandler } from './middleware/errorHandler';
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import { connectDatabase } from "./config/database";
+import questionsRouter from "./routes/questions";
+import quizzesRouter from "./routes/quizzes";
+import analyticsRouter from "./routes/analytics";
+import { errorHandler } from "./middleware/errorHandler";
 
 dotenv.config();
 
@@ -326,9 +322,9 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/questions', questionsRouter);
-app.use('/api/quizzes', quizzesRouter);
-app.use('/api/analytics', analyticsRouter);
+app.use("/api/questions", questionsRouter);
+app.use("/api/quizzes", quizzesRouter);
+app.use("/api/analytics", analyticsRouter);
 
 // Error handling
 app.use(errorHandler);
@@ -349,6 +345,7 @@ start();
 參考 `specs/001-database-question-bank/contracts/` 中的 API 規格：
 
 1. **Questions API** (`questions-api.md`)
+
    - GET /api/questions
    - GET /api/questions/:id
    - POST /api/questions
@@ -356,6 +353,7 @@ start();
    - DELETE /api/questions/:id
 
 2. **Quizzes API** (`quizzes-api.md`)
+
    - POST /api/quizzes
    - POST /api/quizzes/:id/submit
    - GET /api/quizzes/:id
@@ -398,8 +396,8 @@ curl -X POST http://localhost:5000/api/questions \
 **`src/types/question.ts`**:
 
 ```typescript
-export type QuestionType = 'single' | 'multiple' | 'fill';
-export type Difficulty = '簡單' | '中等' | '困難';
+export type QuestionType = "single" | "multiple" | "fill";
+export type Difficulty = "簡單" | "中等" | "困難";
 
 export interface Question {
   _id: string;
@@ -424,14 +422,14 @@ export interface Question {
 **`src/services/api.ts`**:
 
 ```typescript
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: import.meta.env.VITE_API_URL || "/api",
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 // Request interceptor
@@ -449,7 +447,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error.response?.data || error.message);
+    console.error("API Error:", error.response?.data || error.message);
     return Promise.reject(error);
   }
 );
@@ -462,8 +460,8 @@ export default api;
 **`src/services/questionService.ts`**:
 
 ```typescript
-import api from './api';
-import { Question } from '../types/question';
+import api from "./api";
+import { Question } from "../types/question";
 
 export async function fetchQuestions(params?: {
   book?: string;
@@ -472,7 +470,7 @@ export async function fetchQuestions(params?: {
   limit?: number;
   random?: boolean;
 }): Promise<Question[]> {
-  const response = await api.get('/questions', { params });
+  const response = await api.get("/questions", { params });
   return response.data.data;
 }
 
@@ -481,20 +479,37 @@ export async function fetchQuizQuestions(
   difficulty: string
 ): Promise<Question[]> {
   const [singles, multiples, fills] = await Promise.all([
-    fetchQuestions({ book, difficulty, type: 'single', limit: 10, random: true }),
-    fetchQuestions({ book, difficulty, type: 'multiple', limit: 5, random: true }),
-    fetchQuestions({ book, difficulty, type: 'fill', limit: 5, random: true })
+    fetchQuestions({
+      book,
+      difficulty,
+      type: "single",
+      limit: 10,
+      random: true,
+    }),
+    fetchQuestions({
+      book,
+      difficulty,
+      type: "multiple",
+      limit: 5,
+      random: true,
+    }),
+    fetchQuestions({ book, difficulty, type: "fill", limit: 5, random: true }),
   ]);
 
   return [...singles, ...multiples, ...fills];
 }
 
-export async function createQuestion(data: Partial<Question>): Promise<Question> {
-  const response = await api.post('/questions', data);
+export async function createQuestion(
+  data: Partial<Question>
+): Promise<Question> {
+  const response = await api.post("/questions", data);
   return response.data.data;
 }
 
-export async function updateQuestion(id: string, data: Partial<Question>): Promise<Question> {
+export async function updateQuestion(
+  id: string,
+  data: Partial<Question>
+): Promise<Question> {
   const response = await api.put(`/questions/${id}`, data);
   return response.data.data;
 }
@@ -511,9 +526,9 @@ export async function deleteQuestion(id: string): Promise<void> {
 **`src/utils/userStorage.ts`**:
 
 ```typescript
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
-const USER_ID_KEY = 'mmquiz_user_id';
+const USER_ID_KEY = "mmquiz_user_id";
 
 export function getUserId(): string {
   let userId = localStorage.getItem(USER_ID_KEY);
@@ -521,7 +536,7 @@ export function getUserId(): string {
   if (!userId) {
     userId = uuidv4();
     localStorage.setItem(USER_ID_KEY, userId);
-    console.log('Generated new user ID:', userId);
+    console.log("Generated new user ID:", userId);
   }
 
   return userId;
@@ -537,18 +552,22 @@ export function clearUserId(): void {
 參考 `spec.md` 中的 User Stories，修改以下檔案：
 
 1. **QuizPage.tsx**:
+
    - 使用 `fetchQuizQuestions()` 載入題目
    - 使用 `createQuiz()` 建立測驗記錄
    - 使用 `submitQuiz()` 提交答案
 
 2. **ResultPage.tsx**:
+
    - 從 API 回傳的結果顯示分數和錯題
    - 處理「題目已刪除」情況
 
 3. **AdminDashboard.tsx**:
+
    - 新增題庫管理連結
 
 4. **QuestionBank.tsx**（新增）:
+
    - 實作題目 CRUD 介面
    - 顯示題目正確率
 
@@ -567,17 +586,17 @@ export function clearUserId(): void {
 **`server/src/scripts/migrate-questions.ts`**:
 
 ```typescript
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import Question from '../models/Question';
-import existingQuestions from './existing-questions.json';
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import Question from "../models/Question";
+import existingQuestions from "./existing-questions.json";
 
 dotenv.config();
 
 async function migrate() {
   try {
     await mongoose.connect(process.env.MONGODB_URI!);
-    console.log('Connected to MongoDB');
+    console.log("Connected to MongoDB");
 
     // 清空現有題目（可選）
     // await Question.deleteMany({});
@@ -588,9 +607,11 @@ async function migrate() {
       console.log(`✅ Imported: ${q.question.substring(0, 50)}...`);
     }
 
-    console.log(`\n🎉 Successfully imported ${existingQuestions.length} questions`);
+    console.log(
+      `\n🎉 Successfully imported ${existingQuestions.length} questions`
+    );
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error("❌ Migration failed:", error);
   } finally {
     await mongoose.disconnect();
   }
@@ -614,10 +635,14 @@ npm run migrate:questions
 **`server/src/controllers/questionController.ts`**:
 
 ```typescript
-import { Request, Response, NextFunction } from 'express';
-import Question from '../models/Question';
+import { Request, Response, NextFunction } from "express";
+import Question from "../models/Question";
 
-export async function getQuestions(req: Request, res: Response, next: NextFunction) {
+export async function getQuestions(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { book, difficulty, type, limit = 20, random } = req.query;
 
@@ -628,13 +653,17 @@ export async function getQuestions(req: Request, res: Response, next: NextFuncti
 
     let questionsQuery = Question.find(query).limit(Number(limit));
 
-    if (random === 'true') {
+    if (random === "true") {
       // 使用 MongoDB aggregation 進行隨機抽取
       const questions = await Question.aggregate([
         { $match: query },
-        { $sample: { size: Number(limit) } }
+        { $sample: { size: Number(limit) } },
       ]);
-      return res.json({ success: true, data: questions, count: questions.length });
+      return res.json({
+        success: true,
+        data: questions,
+        count: questions.length,
+      });
     }
 
     const questions = await questionsQuery;
@@ -644,13 +673,17 @@ export async function getQuestions(req: Request, res: Response, next: NextFuncti
   }
 }
 
-export async function createQuestion(req: Request, res: Response, next: NextFunction) {
+export async function createQuestion(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const question = await Question.create(req.body);
     res.status(201).json({
       success: true,
       data: question,
-      message: 'Question created successfully'
+      message: "Question created successfully",
     });
   } catch (error) {
     next(error);
@@ -665,22 +698,22 @@ export async function createQuestion(req: Request, res: Response, next: NextFunc
 **`server/src/routes/questions.ts`**:
 
 ```typescript
-import express from 'express';
+import express from "express";
 import {
   getQuestions,
   getQuestion,
   createQuestion,
   updateQuestion,
-  deleteQuestion
-} from '../controllers/questionController';
+  deleteQuestion,
+} from "../controllers/questionController";
 
 const router = express.Router();
 
-router.get('/', getQuestions);
-router.get('/:id', getQuestion);
-router.post('/', createQuestion);
-router.put('/:id', updateQuestion);
-router.delete('/:id', deleteQuestion);
+router.get("/", getQuestions);
+router.get("/:id", getQuestion);
+router.post("/", createQuestion);
+router.put("/:id", updateQuestion);
+router.delete("/:id", deleteQuestion);
 
 export default router;
 ```
@@ -690,7 +723,7 @@ export default router;
 **`server/src/middleware/errorHandler.ts`**:
 
 ```typescript
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
 export function errorHandler(
   err: any,
@@ -698,28 +731,28 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ) {
-  console.error('Error:', err);
+  console.error("Error:", err);
 
   // Mongoose validation error
-  if (err.name === 'ValidationError') {
+  if (err.name === "ValidationError") {
     return res.status(400).json({
       success: false,
-      error: err.message
+      error: err.message,
     });
   }
 
   // Mongoose cast error (invalid ObjectId)
-  if (err.name === 'CastError') {
+  if (err.name === "CastError") {
     return res.status(400).json({
       success: false,
-      error: 'Invalid ID format'
+      error: "Invalid ID format",
     });
   }
 
   // Default error
   res.status(500).json({
     success: false,
-    error: 'Internal server error'
+    error: "Internal server error",
   });
 }
 ```
@@ -733,28 +766,28 @@ export function errorHandler(
 ```typescript
 // src/pages/QuizPage.tsx
 
-import { useState, useEffect } from 'react';
-import { fetchQuizQuestions } from '../services/questionService';
-import { createQuiz } from '../services/quizService';
-import { getUserId } from '../utils/userStorage';
+import { useState, useEffect } from "react";
+import { fetchQuizQuestions } from "../services/questionService";
+import { createQuiz } from "../services/quizService";
+import { getUserId } from "../utils/userStorage";
 
 export function QuizPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [quizId, setQuizId] = useState<string>('');
+  const [quizId, setQuizId] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function startQuiz() {
       try {
         const userId = getUserId();
-        const book = '醫療靈媒';
-        const difficulty = '中等';
+        const book = "醫療靈媒";
+        const difficulty = "中等";
 
         // 1. 隨機抽取 20 題
         const quizQuestions = await fetchQuizQuestions(book, difficulty);
 
         if (quizQuestions.length !== 20) {
-          throw new Error('Failed to load 20 questions');
+          throw new Error("Failed to load 20 questions");
         }
 
         // 2. 建立測驗記錄
@@ -762,13 +795,13 @@ export function QuizPage() {
           userId,
           book,
           difficulty,
-          questions: quizQuestions.map(q => q._id)
+          questions: quizQuestions.map((q) => q._id),
         });
 
         setQuestions(quizQuestions);
         setQuizId(quiz._id);
       } catch (error) {
-        console.error('Failed to start quiz:', error);
+        console.error("Failed to start quiz:", error);
       } finally {
         setLoading(false);
       }
@@ -788,15 +821,15 @@ async function handleSubmit() {
   try {
     const answers = questions.map((q, index) => ({
       questionId: q._id,
-      userAnswer: userAnswers[index] || null
+      userAnswer: userAnswers[index] || null,
     }));
 
     const result = await submitQuiz(quizId, answers);
 
     // 導航到結果頁面
-    onNavigate('result', result);
+    onNavigate("result", result);
   } catch (error) {
-    console.error('Failed to submit quiz:', error);
+    console.error("Failed to submit quiz:", error);
   }
 }
 ```
@@ -832,10 +865,12 @@ Content-Type: application/json
 ### 前端整合測試
 
 1. **檢查 Axios 請求**：
+
    - 開啟瀏覽器開發者工具 → Network tab
    - 查看 API 請求和回應
 
 2. **檢查 localStorage**：
+
    - 開發者工具 → Application → Local Storage
    - 確認 `mmquiz_user_id` 存在
 
@@ -862,6 +897,7 @@ curl http://localhost:3000/api/questions
 ### Q1: CORS 錯誤
 
 **錯誤訊息**:
+
 ```
 Access to XMLHttpRequest at 'http://localhost:5000/api/questions' from origin 'http://localhost:3000' has been blocked by CORS policy
 ```
@@ -870,18 +906,20 @@ Access to XMLHttpRequest at 'http://localhost:5000/api/questions' from origin 'h
 確保後端已安裝並使用 `cors` middleware：
 
 ```typescript
-import cors from 'cors';
+import cors from "cors";
 app.use(cors());
 ```
 
 ### Q2: MongoDB 連接失敗
 
 **錯誤訊息**:
+
 ```
 MongooseServerSelectionError: connect ECONNREFUSED
 ```
 
 **檢查清單**:
+
 1. `.env` 中的 `MONGODB_URI` 是否正確
 2. MongoDB Atlas IP 白名單是否包含 `0.0.0.0/0`
 3. 資料庫使用者密碼是否正確
@@ -892,6 +930,7 @@ MongooseServerSelectionError: connect ECONNREFUSED
 **症狀**: 前端無法呼叫後端 API
 
 **解決方法**:
+
 1. 確認 `vite.config.ts` 配置正確
 2. 重新啟動 Vite 開發伺服器
 3. 確認後端在 port 5000 運行
@@ -906,7 +945,7 @@ MongooseServerSelectionError: connect ECONNREFUSED
 ```typescript
 // src/types/question.ts (前端使用)
 // server/src/models/Question.ts 的介面繼承前端型別
-import { IQuestion as BaseQuestion } from '../../src/types/question';
+import { IQuestion as BaseQuestion } from "../../src/types/question";
 ```
 
 ### Q5: 隨機抽取重複題目
@@ -920,7 +959,7 @@ import { IQuestion as BaseQuestion } from '../../src/types/question';
 
 ```typescript
 if (questions.length !== 20) {
-  throw new Error('題庫不足，請管理員新增更多題目');
+  throw new Error("題庫不足，請管理員新增更多題目");
 }
 ```
 
@@ -978,15 +1017,19 @@ if (questions.length !== 20) {
 **開發順序建議**:
 
 1. Phase 1: 後端基礎建設（2-3 天）
+
    - MongoDB 連接、Models、基礎 CRUD API
 
 2. Phase 2: 測驗核心功能（2-3 天）
+
    - 隨機抽題、測驗記錄、計分邏輯
 
 3. Phase 3: 前端整合（2-3 天）
+
    - 修改現有頁面、Service 層整合
 
 4. Phase 4: 管理功能（2-3 天）
+
    - 題庫 CRUD 介面、資料遷移
 
 5. Phase 5: 統計分析（2-3 天）
@@ -997,6 +1040,7 @@ if (questions.length !== 20) {
 ---
 
 **參考文件**:
+
 - [spec.md](./spec.md) - 功能規格
 - [plan.md](./plan.md) - 實作計畫
 - [data-model.md](./data-model.md) - 資料模型
