@@ -210,9 +210,7 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
               </div>
             </CardContent>
           </Card>
-        )}
-
-        <motion.div
+        \)}\r\n\r\n        {mode === "admin-list" && (\r\n          <Card className="max-w-5xl mx-auto mb-8 border-[#A8CBB7]/20">\r\n            <CardHeader>\r\n              <CardTitle className="text-[#2d3436]">管理員名單</CardTitle>\r\n              <CardDescription className="text-[#636e72]">僅顯示名稱與各自的「想說的話」；只有本人可以編輯。</CardDescription>\r\n            </CardHeader>\r\n            <CardContent>\r\n              <div className="grid md:grid-cols-3 gap-4">\r\n                {admins.map((name) => {\r\n                  const editable = name.toLowerCase() === currentUser;\r\n                  return (\r\n                    <Card key={name} className="border-[#A8CBB7]/20">\r\n                      <CardHeader>\r\n                        <CardTitle className="text-[#2d3436]">{name}</CardTitle>\r\n                        <CardDescription className="text-[#636e72]">只有本人可以編輯此名片</CardDescription>\r\n                      </CardHeader>\r\n                      <CardContent>\r\n                        <label className="block text-sm text-[#2d3436] mb-1">想說的話</label>\r\n                        <textarea className="w-full h-24 border rounded-md px-3 py-2 border-[#A8CBB7]/40 focus:outline-none focus:ring-2 focus:ring-[#A8CBB7]" value={notes[name] || ""} onChange={(e) => setNotes((prev) => ({ ...prev, [name]: e.target.value }))} readOnly={!editable} />\r\n                        <div className="flex justify-end pt-2">\r\n                          <Button disabled={!editable} onClick={() => { try { localStorage.setItem("admin_notes", JSON.stringify(notes)); } catch {} }} className="bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white">{editable ? "儲存" : "僅本人可編輯"}</Button>\r\n                        </div>\r\n                      </CardContent>\r\n                    </Card>\r\n                  );\r\n                })}\r\n              </div>\r\n            </CardContent>\r\n          </Card>\r\n        )}\r\n\r\n        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -255,6 +253,7 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
     </div>
   );
 }
+
 
 
 
