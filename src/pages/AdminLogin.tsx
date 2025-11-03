@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Card } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Button } from '../components/ui/button';
+import { Checkbox } from '../components/ui/checkbox';
 import { NatureAccents } from '../components/NatureAccents';
 import { Lock, User, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { login } from '../services/authService';
@@ -211,3 +212,5 @@ export function AdminLogin({ onLogin, onBack }: AdminLoginProps) {
     </div>
   );
 }
+
+
