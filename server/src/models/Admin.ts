@@ -1,11 +1,11 @@
-import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcrypt';
+import mongoose, { Document, Schema } from "mongoose";
+import bcrypt from "bcrypt";
 
 export interface IAdmin extends Document {
   username: string;
   password: string;
   email?: string;
-  role: 'super' | 'admin';
+  role: "super" | "admin";
   isActive: boolean;
   loginAttempts: number;
   lockUntil?: Date;
@@ -42,12 +42,12 @@ const adminSchema = new Schema<IAdmin>(
     note: {
       type: String,
       maxlength: 1000,
-      default: '',
+      default: "",
     },
     role: {
       type: String,
-      enum: ['super', 'admin'],
-      default: 'admin',
+      enum: ["super", "admin"],
+      default: "admin",
     },
     isActive: {
       type: Boolean,
@@ -70,12 +70,12 @@ const adminSchema = new Schema<IAdmin>(
 );
 
 // Hash password before saving
-adminSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+adminSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
 
   try {
     const salt = await bcrypt.genSalt(10);
-    // @ts-expect-error - this is a mongoose document
+
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error: any) {
@@ -87,20 +87,18 @@ adminSchema.pre('save', async function (next) {
 adminSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
-  // @ts-expect-error - this is a mongoose document
   return bcrypt.compare(candidatePassword, this.password);
 };
 
 // Check if account is locked
 adminSchema.methods.isLocked = function (): boolean {
-  // @ts-expect-error - this is a mongoose document
   return !!(this.lockUntil && this.lockUntil > new Date());
 };
 
 // Increment login attempts
 adminSchema.methods.incrementLoginAttempts = async function (): Promise<void> {
   // If lock expired, reset attempts
-  // @ts-expect-error - this is a mongoose document
+
   if (this.lockUntil && this.lockUntil < new Date()) {
     await this.updateOne({
       $set: { loginAttempts: 1 },
@@ -115,7 +113,6 @@ adminSchema.methods.incrementLoginAttempts = async function (): Promise<void> {
   const MAX_LOGIN_ATTEMPTS = 5;
   const LOCK_TIME = 15 * 60 * 1000; // 15 minutes
 
-  // @ts-expect-error - this is a mongoose document
   if (this.loginAttempts + 1 >= MAX_LOGIN_ATTEMPTS && !this.isLocked()) {
     updates.$set = { lockUntil: new Date(Date.now() + LOCK_TIME) };
   }
@@ -131,7 +128,6 @@ adminSchema.methods.resetLoginAttempts = async function (): Promise<void> {
   });
 };
 
-const Admin = mongoose.model<IAdmin>('Admin', adminSchema);
+const Admin = mongoose.model<IAdmin>("Admin", adminSchema);
 
 export default Admin;
-
