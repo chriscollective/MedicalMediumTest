@@ -19,6 +19,7 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
+  const [editingName, setEditingName] = useState<string | null>(null);
 
   // 管理員名單（本地）
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -189,3 +190,4 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
     </div>
   );
 }
+
