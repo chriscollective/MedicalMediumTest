@@ -17,7 +17,7 @@ import {
 } from "../components/ui/dialog";
 import { NatureAccents } from "../components/NatureAccents";
 import { ArrowLeft, KeyRound, Users, MessageSquare } from "lucide-react";
-import { changePassword as changePasswordApi } from "../services/authService";
+import { changePassword as changePasswordApi, getCurrentUser } from "../services/authService";
 
 interface AdminSettingsProps {
   onBack: () => void;
@@ -32,7 +32,13 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
   const [notes, setNotes] = useState<Record<string, string>>({});
-  const currentUser = (getCurrentUser()?.username || "").toLowerCase();
+  const [currentUser, setCurrentUser] = useState("");
+  useEffect(() => {
+    try {
+      const u = (getCurrentUser()?.username || "").toLowerCase();
+      setCurrentUser(u);
+    } catch {}
+  }, []);
   const admins = ["Chris","Bebe","Miruki"];
 
   const items = [
@@ -249,5 +255,6 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
     </div>
   );
 }
+
 
 
