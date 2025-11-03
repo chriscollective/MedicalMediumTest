@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import {
   Card,
@@ -24,13 +24,16 @@ interface AdminSettingsProps {
 }
 
 export function AdminSettings({ onBack }: AdminSettingsProps) {
-  const [mode, setMode] = useState<null | "change-password">(null);
+  const [mode, setMode] = useState<null | "change-password" | "admin-list">(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const currentUser = (getCurrentUser()?.username || "").toLowerCase();
+  const admins = ["Chris","Bebe","Miruki"];
 
   const items = [
     {
@@ -47,7 +50,7 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
       description: "檢視或管理現有管理員帳號",
       icon: <Users className="w-6 h-6 text-white" />,
       color: "from-[#E5C17A] to-[#d4b86a]",
-      action: () => alert("管理員名單：\nChris\nBebe\nMiruki"),
+      action: () => setMode("admin-list"),
     },
     {
       id: "feedback",
@@ -55,7 +58,7 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
       description: "提出改善建議或錯誤回報",
       icon: <MessageSquare className="w-6 h-6 text-white" />,
       color: "from-[#A8CBB7] to-[#2d3436]",
-      action: () => alert("管理員名單：\nChris\nBebe\nMiruki"),
+      action: () => setMode("admin-list"),
     },
   ];
 
@@ -246,3 +249,5 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
     </div>
   );
 }
+
+
