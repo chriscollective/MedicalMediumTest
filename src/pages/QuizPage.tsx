@@ -212,7 +212,7 @@ export function QuizPage({
 
       const quiz = await createQuiz({
         userId,
-        book: primaryBook,
+        book: (books.length > 1 ? "綜合" : primaryBook),
         difficulty: apiDifficulty,
         questionIds: apiQuestions.map((q) => q._id),
       });
