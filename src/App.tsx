@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { LandingPage } from "./pages/LandingPage";
 import { QuizPage } from "./pages/QuizPage";
 import { ResultPage } from "./pages/ResultPage";
 import { AdminLogin } from "./pages/AdminLogin";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { Analytics } from "./pages/Analytics";
+import { AdminSettings } from "./pages/AdminSettings";
+import { AdminSettings } from "./pages/AdminSettings";
 import { QuestionBank } from "./pages/QuestionBank";
 import { Leaderboard } from "./pages/Leaderboard";
 import { About } from "./pages/About";
@@ -22,6 +24,7 @@ type AppPage =
   | "analytics"
   | "questions"
   | "leaderboard"
+  | "settings"
   | "about"
   | "privacy-policy";
 
@@ -146,7 +149,7 @@ function App() {
   };
 
   const handleAdminNavigate = (
-    page: "analytics" | "questions" | "leaderboard"
+    page: "analytics" | "questions" | "leaderboard" | "settings"
   ) => {
     if (page === "leaderboard") {
       setLeaderboardSource("admin-dashboard");
@@ -218,6 +221,10 @@ function App() {
 
       {currentPage === "leaderboard" && (
         <Leaderboard onBack={() => setCurrentPage(leaderboardSource)} />
+      )}
+
+      {currentPage === "settings" && (
+        <AdminSettings onBack={() => setCurrentPage("admin-dashboard")} />
       )}
 
       {currentPage === "about" && (

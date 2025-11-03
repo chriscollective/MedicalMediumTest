@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { motion } from "motion/react";
 import {
   Card,
@@ -14,7 +14,7 @@ import { logout } from "../services/authService";
 
 interface AdminDashboardProps {
   username: string;
-  onNavigate: (page: "analytics" | "questions" | "leaderboard") => void;
+  onNavigate: (page: "analytics" | "questions" | "leaderboard" | "settings") => void;
   onLogout: () => void;
 }
 
@@ -55,7 +55,7 @@ export function AdminDashboard({
       title: "管理員設定",
       description: "系統設定與權限管理（開發中）",
       color: "from-[#636e72] to-[#2d3436]",
-      action: () => {},
+      action: () => onNavigate("settings"),
     },
   ];
 
