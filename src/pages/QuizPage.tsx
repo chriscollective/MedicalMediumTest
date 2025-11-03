@@ -212,7 +212,7 @@ export function QuizPage({
 
       const quiz = await createQuiz({
         userId,
-        book: (books.length > 1 ? "綜合" : primaryBook),
+        book: books.length > 1 ? "綜合" : primaryBook,
         difficulty: apiDifficulty,
         questionIds: apiQuestions.map((q) => q._id),
       });
@@ -461,6 +461,7 @@ export function QuizPage({
           </Button>
         </div>
 
+        {/* this is a test */}
         {/* Page Indicator */}
         <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2">
           <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
