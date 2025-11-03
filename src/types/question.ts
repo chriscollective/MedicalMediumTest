@@ -12,6 +12,8 @@ export interface Question {
   explanation?: string;
   difficulty: Difficulty;
   book: string;
+  createdBy?: string;
+  updatedBy?: string;
   createdAt: string;
   updatedAt: string;
 }

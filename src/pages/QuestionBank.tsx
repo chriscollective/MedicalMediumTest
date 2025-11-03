@@ -45,7 +45,7 @@ import {
 } from "../services/questionService";
 import { getQuestionsStats, QuestionStats } from "../services/analyticsService";
 import { createBook, fetchBooks, type Book } from "../services/bookService";
-import { getToken } from "../services/authService";
+import { getToken, getCurrentUser } from "../services/authService";
 import { BOOKS, DIFFICULTIES } from "../constants/books";
 
 interface QuestionBankProps {
@@ -63,6 +63,10 @@ interface ApiQuestion {
   difficulty: string;
   source?: string;
   explanation?: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 interface QuestionData {
@@ -76,6 +80,10 @@ interface QuestionData {
   correctAnswer: number | number[];
   source?: string;
   explanation?: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 const typeMapping: Record<string, "單選" | "多選" | "填空"> = {
@@ -100,6 +108,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
   const [filterBook, setFilterBook] = useState<string>("all");
   const [filterDifficulty, setFilterDifficulty] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
+  const [filterAuthor, setFilterAuthor] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<QuestionData | null>(
     null
@@ -108,6 +117,8 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const [stats, setStats] = useState<Map<string, QuestionStats>>(new Map());
+  const currentAdmin = getCurrentUser();
+  const canDelete = (currentAdmin?.username || '').toLowerCase() === 'chris';
 
   // 新增書籍相關狀態
   const [isBookDialogOpen, setIsBookDialogOpen] = useState(false);
@@ -159,6 +170,10 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
           correctAnswer: q.correctAnswer,
           source: q.source,
           explanation: q.explanation,
+          createdBy: q.createdBy,
+          createdAt: q.createdAt,
+          updatedBy: q.updatedBy,
+          updatedAt: q.updatedAt,
         })
       );
 
@@ -198,7 +213,16 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
     const matchesDifficulty =
       filterDifficulty === "all" || q.difficulty === filterDifficulty;
     const matchesType = filterType === "all" || q.type === filterType;
-    return matchesSearch && matchesBook && matchesDifficulty && matchesType;
+    const matchesAuthor =
+      filterAuthor === "all" ||
+      (q.createdBy || "").toLowerCase() === filterAuthor.toLowerCase();
+    return (
+      matchesSearch &&
+      matchesBook &&
+      matchesDifficulty &&
+      matchesType &&
+      matchesAuthor
+    );
   });
 
   // Pagination
@@ -210,7 +234,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterBook, filterDifficulty, filterType]);
+  }, [searchTerm, filterBook, filterDifficulty, filterType, filterAuthor]);
 
   const handleDelete = async (id: string) => {
     if (confirm("確定要刪除此題目嗎？")) {
@@ -855,6 +879,19 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                     <SelectItem value="填空">填空題</SelectItem>
                   </SelectContent>
                 </Select>
+
+                {/* 出題者篩選 */}
+                <Select value={filterAuthor} onValueChange={setFilterAuthor}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="出題者" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">全部出題者</SelectItem>
+                    <SelectItem value="Bebe">Bebe</SelectItem>
+                    <SelectItem value="Miruki">Miruki</SelectItem>
+                    <SelectItem value="Chris">Chris</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Table */}
@@ -875,6 +912,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                           <TableHead className="w-32">書籍</TableHead>
                           <TableHead className="w-20">難度</TableHead>
                           <TableHead className="w-28">正確率</TableHead>
+                          <TableHead className="w-24">出題</TableHead>
                           <TableHead className="w-32 text-right">
                             操作
                           </TableHead>
@@ -884,7 +922,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                         {currentQuestions.length === 0 ? (
                           <TableRow>
                             <TableCell
-                              colSpan={7}
+                              colSpan={8}
                               className="text-center py-8 text-[#636e72]"
                             >
                               沒有找到題目
@@ -968,25 +1006,30 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                                   );
                                 })()}
                               </TableCell>
+                              <TableCell>
+                                {q.createdBy || "-"}
+                              </TableCell>
                               <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleEdit(q)}
-                                    className="text-[#A8CBB7] hover:bg-[#F7E6C3]/20"
-                                  >
-                                    <Pencil className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleDelete(q.id)}
-                                    className="text-red-500 hover:bg-red-50"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleEdit(q)}
+                                      className="text-[#A8CBB7] hover:bg-[#F7E6C3]/20"
+                                    >
+                                      <Pencil className="w-4 h-4" />
+                                    </Button>
+                                    {canDelete && (
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleDelete(q.id)}
+                                        className="text-red-500 hover:bg-red-50"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    )}
+                                  </div>
                               </TableCell>
                             </TableRow>
                           ))
@@ -1046,3 +1089,6 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
     </div>
   );
 }
+
+
+

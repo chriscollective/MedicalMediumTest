@@ -10,6 +10,9 @@ export interface IQuestion extends Document {
   explanation?: string;
   difficulty: '初階' | '進階';
   book: string;
+  createdBy?: string;
+  updatedBy?: string;
+  history?: Array<{ updatedBy: string; updatedAt: Date }>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -85,7 +88,24 @@ const QuestionSchema: Schema = new Schema({
     type: String,
     required: true,
     index: true
-  }
+  },
+  createdBy: {
+    type: String,
+    index: true
+  },
+  updatedBy: {
+    type: String,
+    index: true
+  },
+  history: [
+    new Schema(
+      {
+        updatedBy: { type: String, required: true },
+        updatedAt: { type: Date, required: true }
+      },
+      { _id: false }
+    )
+  ]
 }, {
   timestamps: true
 });

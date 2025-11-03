@@ -24,7 +24,7 @@ export function About({ onBack }: AboutProps) {
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
       {/* 背景（沿用首頁） */}
       <div
-        className={`absolute inset-0 opacity-30 ${isMobile ? 'hidden' : ''}`}
+        className={`absolute inset-0 opacity-30 ${isMobile ? "hidden" : ""}`}
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1604248215430-100912b27ead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwbmF0dXJlJTIwbGVhdmVzJTIwbGlnaHR8ZW58MXx8fHwxNzYxODA3MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080')",
@@ -123,7 +123,8 @@ export function About({ onBack }: AboutProps) {
             </CardHeader>
             <CardContent className="text-[#2d3436]">
               <p>
-                感謝醫療靈媒粉絲團，《_____》與《_____》協助參與題目的編寫、校正，沒有他們的幫忙，這個網站是不可能有容此豐富的題庫!再次感謝所有參與這個網站的粉絲們!
+                感謝醫療靈媒粉絲團，《HELENE
+                BEBE》與《米魯奇》協助參與題目的編寫、校正，沒有他們的幫忙，這個網站是不可能有容此豐富的題庫!再次感謝所有參與這個網站的粉絲們!
               </p>
             </CardContent>
           </Card>
