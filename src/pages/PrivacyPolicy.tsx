@@ -24,7 +24,9 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
     <div className="min-h-screen relative  overflow-hidden bg-gradient-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
       {/* 背景（沿用首頁） */}
       <div
-        className={`absolute inset-0 opacity-30 overflow-hidden ${isMobile ? 'hidden' : ''}`}
+        className={`absolute inset-0 opacity-30 overflow-hidden ${
+          isMobile ? "hidden" : ""
+        }`}
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1604248215430-100912b27ead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwbmF0dXJlJTIwbGVhdmVzJTIwbGlnaHR8ZW58MXx8fHwxNzYxODA3MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080')",
@@ -45,7 +47,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="flex items-center gap-2 text-[#2d3436]">
               <Sparkles className="w-6 h-6 text-[#A8CBB7]" />
-              <span className="font-medium">隱私政策</span>
+              <span className="text-2xl font-extrabold">隱私政策</span>
               <Sparkles className="w-6 h-6 text-[#A8CBB7]" />
             </div>
           </div>
@@ -94,27 +96,6 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
                   </li>
                   <li>
                     <strong>答題記錄</strong>：用於產生錯題統計與學習分析
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">網站使用數據（自動收集）</h4>
-                <ul className="list-disc pl-5 space-y-2 text-sm">
-                  <li>
-                    <strong>訪問統計</strong>
-                    ：頁面瀏覽次數、訪客數量、訪問時間
-                  </li>
-                  <li>
-                    <strong>裝置資訊</strong>
-                    ：瀏覽器類型、作業系統、螢幕解析度
-                  </li>
-                  <li>
-                    <strong>地理位置</strong>
-                    ：國家/地區（不包含精確位置）
-                  </li>
-                  <li>
-                    <strong>效能指標</strong>：頁面載入速度、互動回應時間
                   </li>
                 </ul>
               </div>
@@ -192,7 +173,8 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             </CardHeader>
             <CardContent className="text-[#2d3436] space-y-3">
               <p className="text-sm">
-                本網站使用瀏覽器的 localStorage（本地儲存）功能，用於：
+                本網站並無使用Cookie，而是使用瀏覽器的
+                localStorage（本地儲存）功能，用於：
               </p>
               <ul className="list-disc pl-5 space-y-2 text-sm">
                 <li>

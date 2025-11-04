@@ -95,7 +95,7 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10 pb-100">
       {/* Background blur effect */}
       <div
-        className={`absolute inset-0 opacity-30 ${isMobile ? 'hidden' : ''}`}
+        className={`absolute inset-0 opacity-30 ${isMobile ? "hidden" : ""}`}
         style={{
           backgroundImage: `url('https://images.unsplash.com/photo-1604248215430-100912b27ead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwbmF0dXJlJTIwbGVhdmVzJTIwbGlnaHR8ZW58MXx8fHwxNzYxODA3MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080')`,
           backgroundSize: "cover",
@@ -229,7 +229,7 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                             ${
                               getDifficultyText(entry.difficulty) === "初階"
                                 ? "bg-green-100 text-green-700"
-                                : "bg-purple-100 text-purple-700"
+                                : "bg-yellow-100 text-yellow-700"
                             }
                           `}
                           >

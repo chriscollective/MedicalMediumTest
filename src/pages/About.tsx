@@ -45,7 +45,7 @@ export function About({ onBack }: AboutProps) {
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="flex items-center gap-2 text-[#2d3436]">
               <Sparkles className="w-6 h-6 text-[#A8CBB7]" />
-              <span className="font-medium">關於本站</span>
+              <span className="text-2xl font-extrabold">關於本站</span>
               <Sparkles className="w-6 h-6 text-[#A8CBB7]" />
             </div>
           </div>
@@ -124,7 +124,7 @@ export function About({ onBack }: AboutProps) {
             <CardContent className="text-[#2d3436]">
               <p>
                 感謝醫療靈媒粉絲團，《HELENE
-                BEBE》與《米魯奇》協助參與題目的編寫、校正，沒有他們的幫忙，這個網站是不可能有容此豐富的題庫!再次感謝所有參與這個網站的粉絲們!
+                BEBE》提供素材、，讓這個網站有豐富的題庫!再次感謝所有參與這個網站的粉絲們!
               </p>
             </CardContent>
           </Card>

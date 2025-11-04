@@ -135,6 +135,14 @@ export function QuizPage({
     loadQuestions();
   }, [books, difficulty]);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const questionsPerPage = 5;
   const totalPages = Math.ceil(questions.length / questionsPerPage);
 
@@ -421,9 +429,8 @@ export function QuizPage({
             ))}
           </motion.div>
         </AnimatePresence>
-
         {/* Navigation Buttons */}
-        <div className="fixed bottom-8 right-8 flex gap-3">
+        <div className="fixed bottom-8 right-8 flex gap-3 z-10">
           <Button
             onClick={handlePrevious}
             disabled={currentPage === 1}
@@ -450,6 +457,7 @@ export function QuizPage({
               transition-all duration-300
               flex items-center gap-2
               disabled:opacity-50 disabled:cursor-not-allowed
+              
             "
           >
             {submitting
@@ -461,11 +469,31 @@ export function QuizPage({
           </Button>
         </div>
 
-        {/* this is a test */}
         {/* Page Indicator */}
-        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
-            <span className="text-sm text-[#636e72]">
+        <div
+          style={{
+            position: "fixed",
+            bottom: "2rem", // bottom-8
+            left: isMobile ? "1rem" : "50%",
+            transform: isMobile ? "none" : "translateX(-50%)",
+            zIndex: 40, // 確保不被其他元素遮住
+          }}
+        >
+          <div
+            style={{
+              background: "rgba(255, 255, 255, 0.9)",
+              backdropFilter: "blur(6px)",
+              padding: "0.5rem 1rem",
+              borderRadius: "9999px",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.875rem",
+                color: "#636e72",
+              }}
+            >
               第 {currentPage} / {totalPages} 頁
             </span>
           </div>
