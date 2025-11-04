@@ -85,7 +85,8 @@ function App() {
     if (
       currentPage === "about" ||
       currentPage === "leaderboard" ||
-      currentPage === "privacy-policy"
+      currentPage === "privacy-policy" ||
+      currentPage === "result"
     ) {
       try {
         window.scrollTo({ top: 0, left: 0, behavior: "auto" });

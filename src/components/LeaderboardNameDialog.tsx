@@ -37,7 +37,7 @@ export function LeaderboardNameDialog({
 
     setSubmitting(true);
     try {
-      const finalName = useAnonymous ? "匿名勇者" : displayName.trim();
+      const finalName = useAnonymous ? "MM小粉絲" : displayName.trim();
       await onSubmit(finalName);
       onClose();
     } catch (error) {
@@ -119,7 +119,7 @@ export function LeaderboardNameDialog({
               htmlFor="anonymous"
               className="text-sm text-[#636e72] cursor-pointer"
             >
-              使用匿名（顯示為「匿名勇者」）
+              使用匿名（顯示為「MM小粉絲」）
             </label>
           </div>
         </div>

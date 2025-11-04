@@ -124,7 +124,7 @@ export function About({ onBack }: AboutProps) {
             <CardContent className="text-[#2d3436]">
               <p>
                 感謝醫療靈媒粉絲團，《HELENE
-                BEBE》提供素材、，讓這個網站有豐富的題庫!再次感謝所有參與這個網站的粉絲們!
+                BEBE》提供素材，讓這個網站有豐富的題庫!再次感謝所有參與這個網站的粉絲們!
               </p>
             </CardContent>
           </Card>

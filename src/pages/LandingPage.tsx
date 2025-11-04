@@ -45,7 +45,7 @@ export function LandingPage({
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
+    <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
       {/* Background blur effect (disabled on mobile) */}
       {!isMobile && (
         <div
@@ -121,7 +121,7 @@ export function LandingPage({
                   px-8 py-6 rounded-2xl cursor-pointer transition-all duration-300
                   ${
                     difficulty === "beginner"
-                      ? "bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8] text-white shadow-lg hover:shadow-xl"
+                      ? "bg-linear-to-br from-[#A8CBB7] to-[#9fb8a8] text-white shadow-lg hover:shadow-xl"
                       : "border-[#A8CBB7] text-[#2d3436] hover:bg-[#F7E6C3]/20"
                   }
                 `}
@@ -135,7 +135,7 @@ export function LandingPage({
                   px-8 py-6 rounded-2xl cursor-pointer transition-all duration-300
                   ${
                     difficulty === "advanced"
-                      ? "bg-gradient-to-r from-[#E5C17A] to-[#d4b86a] text-white shadow-lg hover:shadow-xl"
+                      ? "bg-linear-to-r from-[#E5C17A] to-[#d4b86a] text-white shadow-lg hover:shadow-xl"
                       : "border-[#E5C17A] text-[#2d3436] hover:bg-[#F7E6C3]/20"
                   }
                 `}
@@ -157,14 +157,14 @@ export function LandingPage({
               disabled={selectedBooks.length === 0}
               className="
                 px-12 py-8 rounded-3xl cursor-pointer
-                bg-gradient-to-r from-[#A8CBB7] via-[#9fb8a8] to-[#A8CBB7]
+                bg-linear-to-r from-[#A8CBB7] via-[#9fb8a8] to-[#A8CBB7]
                 text-white shadow-2xl
                 hover:shadow-[0_0_40px_rgba(168,203,183,0.5)]
                 disabled:opacity-50 disabled:cursor-not-allowed
                 transition-all duration-300
                 relative overflow-hidden
                 group
-                before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#E5C17A]/0 before:via-[#E5C17A]/20 before:to-[#E5C17A]/0
+                before:absolute before:inset-0 before:bg-linear-to-r before:from-[#E5C17A]/0 before:via-[#E5C17A]/20 before:to-[#E5C17A]/0
                 before:animate-pulse before:opacity-0 hover:before:opacity-100
               "
             >
@@ -177,7 +177,7 @@ export function LandingPage({
                   ✨
                 </motion.span>
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
             </Button>
           </motion.div>
         </motion.div>
