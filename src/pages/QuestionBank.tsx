@@ -36,7 +36,15 @@ import { Textarea } from "../components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Checkbox } from "../components/ui/checkbox";
 import { NatureAccents } from "../components/NatureAccents";
-import { ArrowLeft, Plus, Pencil, Trash2, Search, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  Pencil,
+  Trash2,
+  Search,
+  Loader2,
+  Minus,
+} from "lucide-react";
 import {
   fetchQuestions,
   createQuestion,
@@ -55,7 +63,7 @@ interface QuestionBankProps {
 interface ApiQuestion {
   _id: string;
   question: string;
-  type: "single" | "multiple" | "fill";
+  type: "single" | "multiple" | "fill" | "cloze";
   options?: string[];
   fillOptions?: string[];
   correctAnswer: number | number[];
@@ -68,11 +76,13 @@ interface ApiQuestion {
   updatedBy?: string;
   updatedAt?: string;
 }
+
+type QuestionTypeLabel = "單選" | "多選" | "填空" | "克漏字";
 
 interface QuestionData {
   id: string;
   question: string;
-  type: "單選" | "多選" | "填空";
+  type: QuestionTypeLabel;
   book: string;
   difficulty: string;
   options?: string[];
@@ -86,19 +96,66 @@ interface QuestionData {
   updatedAt?: string;
 }
 
-const typeMapping: Record<string, "單選" | "多選" | "填空"> = {
+const typeMapping: Record<ApiQuestion["type"], QuestionTypeLabel> = {
   single: "單選",
   multiple: "多選",
   fill: "填空",
+  cloze: "克漏字",
 };
 
-const reverseTypeMapping: Record<
-  "單選" | "多選" | "填空",
-  "single" | "multiple" | "fill"
-> = {
+const reverseTypeMapping: Record<QuestionTypeLabel, ApiQuestion["type"]> = {
   單選: "single",
   多選: "multiple",
   填空: "fill",
+  克漏字: "cloze",
+};
+
+const MIN_CLOZE_OPTIONS = 1;
+const MAX_CLOZE_OPTIONS = 6;
+const DEFAULT_CLOZE_OPTION_COUNT = 3;
+
+const createClozeOptions = (length: number) =>
+  Array.from({ length }, () => "");
+
+const createClozeOrder = (length: number) =>
+  Array.from({ length }, (_, idx) => idx);
+
+const sanitizeClozeOrder = (optionsLength: number, currentOrder: number[]) => {
+  if (optionsLength <= 0) {
+    return [];
+  }
+
+  const result: number[] = [];
+  const seen = new Set<number>();
+
+  currentOrder.forEach((idx) => {
+    if (
+      Number.isInteger(idx) &&
+      idx >= 0 &&
+      idx < optionsLength &&
+      !seen.has(idx)
+    ) {
+      seen.add(idx);
+      result.push(idx);
+    }
+  });
+
+  return result;
+};
+
+const ensureClozeOrderLength = (
+  optionsLength: number,
+  currentOrder: number[]
+) => {
+  if (optionsLength <= 0) {
+    return [];
+  }
+  const sanitized = sanitizeClozeOrder(optionsLength, currentOrder);
+  if (sanitized.length > 0) {
+    return sanitized;
+  }
+  // fallback：若使用者尚未設定任何答案，預設第一個選項
+  return [0];
 };
 
 export function QuestionBank({ onBack }: QuestionBankProps) {
@@ -126,14 +183,19 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
   const [addingBook, setAddingBook] = useState(false);
   const [booksOptions, setBooksOptions] = useState<string[]>([]);
 
+  const DEFAULT_SINGLE_OPTIONS = ["", "", "", ""];
+  const DEFAULT_FILL_OPTIONS = ["", "", "", "", "", ""];
+
   const [formData, setFormData] = useState({
     book: "",
     difficulty: "初階",
-    type: "單選" as "單選" | "多選" | "填空",
+    type: "單選" as QuestionTypeLabel,
     question: "",
-    options: ["", "", "", ""],
-    fillOptions: ["", "", "", "", "", ""],
-    correctAnswer: [] as number[],
+    options: [...DEFAULT_SINGLE_OPTIONS],
+    fillOptions: [...DEFAULT_FILL_OPTIONS],
+    clozeOptions: createClozeOptions(DEFAULT_CLOZE_OPTION_COUNT),
+    correctAnswer: [] as number[], // 多選使用
+    clozeOrder: createClozeOrder(DEFAULT_CLOZE_OPTION_COUNT),
     singleCorrectAnswer: 0,
     explanation: "",
     source: "",
@@ -273,17 +335,35 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
   const handleEdit = (question: QuestionData) => {
     setEditingQuestion(question);
 
-    // Populate form data for editing
     let correctAnswerArray: number[] = [];
     let singleAnswer = 0;
+  let clozeOptions =
+    question.type === "克漏字" &&
+    question.options &&
+    question.options.length > 0
+      ? [...question.options]
+          .slice(0, MAX_CLOZE_OPTIONS)
+          .map((opt) => String(opt ?? "").trim())
+      : createClozeOptions(DEFAULT_CLOZE_OPTION_COUNT);
+  if (clozeOptions.length < MIN_CLOZE_OPTIONS) {
+    clozeOptions = createClozeOptions(DEFAULT_CLOZE_OPTION_COUNT);
+  }
+  let clozeOrder = ensureClozeOrderLength(
+    clozeOptions.length,
+    Array.isArray(question.correctAnswer)
+      ? (question.correctAnswer as number[])
+      : []
+  );
 
     if (question.type === "多選") {
       correctAnswerArray = Array.isArray(question.correctAnswer)
-        ? question.correctAnswer
+        ? (question.correctAnswer as number[])
         : [];
-    } else {
+    } else if (question.type !== "克漏字") {
       singleAnswer =
-        typeof question.correctAnswer === "number" ? question.correctAnswer : 0;
+        typeof question.correctAnswer === "number"
+          ? (question.correctAnswer as number)
+          : 0;
     }
 
     setFormData({
@@ -291,10 +371,21 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
       difficulty: question.difficulty,
       type: question.type,
       question: question.question,
-      options: question.options || ["", "", "", ""],
-      fillOptions: question.fillOptions || ["", "", "", "", "", ""],
-      correctAnswer: correctAnswerArray,
-      singleCorrectAnswer: singleAnswer,
+      options:
+        question.options && question.options.length > 0
+          ? [...question.options]
+          : [...DEFAULT_SINGLE_OPTIONS],
+      fillOptions:
+        question.fillOptions && question.fillOptions.length > 0
+          ? [...question.fillOptions]
+          : [...DEFAULT_FILL_OPTIONS],
+      clozeOptions,
+      correctAnswer: question.type === "多選" ? correctAnswerArray : [],
+      clozeOrder,
+      singleCorrectAnswer:
+        question.type === "單選" || question.type === "填空"
+          ? singleAnswer
+          : 0,
       explanation: question.explanation || "",
       source: question.source || "",
     });
@@ -308,14 +399,123 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
       difficulty: "初階",
       type: "單選",
       question: "",
-      options: ["", "", "", ""],
-      fillOptions: ["", "", "", "", "", ""],
+      options: [...DEFAULT_SINGLE_OPTIONS],
+      fillOptions: [...DEFAULT_FILL_OPTIONS],
+      clozeOptions: createClozeOptions(DEFAULT_CLOZE_OPTION_COUNT),
       correctAnswer: [],
+      clozeOrder: createClozeOrder(DEFAULT_CLOZE_OPTION_COUNT),
       singleCorrectAnswer: 0,
       explanation: "",
       source: "",
     });
     setEditingQuestion(null);
+  };
+
+  const handleClozeOrderChange = (position: number, value: number) => {
+    setFormData((prev) => {
+      if (
+        value < 0 ||
+        value >= prev.clozeOptions.length ||
+        position < 0 ||
+        position >= prev.clozeOrder.length
+      ) {
+        return prev;
+      }
+      const updatedOrder = [...prev.clozeOrder];
+      const existingIndex = updatedOrder.indexOf(value);
+
+      if (existingIndex !== -1 && existingIndex !== position) {
+        updatedOrder[existingIndex] = updatedOrder[position];
+      }
+
+      updatedOrder[position] = value;
+
+      return {
+        ...prev,
+        clozeOrder: ensureClozeOrderLength(
+          prev.clozeOptions.length,
+          updatedOrder
+        ),
+      };
+    });
+  };
+
+  const handleClozeOptionChange = (index: number, value: string) => {
+    setFormData((prev) => {
+      const newOptions = [...prev.clozeOptions];
+      newOptions[index] = value;
+      return {
+        ...prev,
+        clozeOptions: newOptions,
+        clozeOrder: ensureClozeOrderLength(
+          newOptions.length,
+          prev.clozeOrder
+        ),
+      };
+    });
+  };
+
+  const handleAddClozeOption = () => {
+    setFormData((prev) => {
+      if (prev.clozeOptions.length >= MAX_CLOZE_OPTIONS) {
+        return prev;
+      }
+      const newOptions = [...prev.clozeOptions, ""];
+      return {
+        ...prev,
+        clozeOptions: newOptions,
+        clozeOrder: ensureClozeOrderLength(
+          newOptions.length,
+          prev.clozeOrder
+        ),
+      };
+    });
+  };
+
+  const handleRemoveClozeOption = (index: number) => {
+    setFormData((prev) => {
+      if (prev.clozeOptions.length <= MIN_CLOZE_OPTIONS) {
+        return prev;
+      }
+      const newOptions = prev.clozeOptions.filter((_, idx) => idx !== index);
+      const remappedOrder = prev.clozeOrder
+        .filter((idx) => idx !== index)
+        .map((idx) => (idx > index ? idx - 1 : idx));
+      return {
+        ...prev,
+        clozeOptions: newOptions,
+        clozeOrder: ensureClozeOrderLength(newOptions.length, remappedOrder),
+      };
+    });
+  };
+
+  const handleAddClozeBlank = () => {
+    setFormData((prev) => {
+      if (prev.clozeOrder.length >= prev.clozeOptions.length) {
+        return prev;
+      }
+      const available = prev.clozeOptions
+        .map((_, idx) => idx)
+        .filter((idx) => !prev.clozeOrder.includes(idx));
+      const nextIndex = available.length > 0 ? available[0] : 0;
+      return {
+        ...prev,
+        clozeOrder: [...prev.clozeOrder, nextIndex],
+      };
+    });
+  };
+
+  const handleRemoveClozeBlank = (index: number) => {
+    setFormData((prev) => {
+      if (prev.clozeOrder.length <= 1) {
+        return prev;
+      }
+      const newOrder = prev.clozeOrder.filter((_, idx) => idx !== index);
+      return {
+        ...prev,
+        clozeOrder: ensureClozeOrderLength(prev.clozeOptions.length, newOrder),
+      };
+    });
   };
 
   const handleSave = async () => {
@@ -333,34 +533,104 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
       let apiOptions: string[] | undefined;
       let apiFillOptions: string[] | undefined;
 
+      const normalizeOptions = (options: string[]) =>
+        options
+          .map((opt, idx) => ({
+            value: opt.trim(),
+            originalIndex: idx,
+          }))
+          .filter((entry) => entry.value.length > 0);
+
       if (formData.type === "單選") {
-        apiCorrectAnswer = formData.singleCorrectAnswer;
-        apiOptions = formData.options.filter((opt) => opt.trim() !== "");
-        if (apiOptions.length < 2) {
-          alert("單選題至少需要2個選項");
+        const optionEntries = normalizeOptions(formData.options);
+        if (optionEntries.length < 2) {
+          alert("單選題至少需要 2 個選項");
           return;
         }
+        const selectedIndex = optionEntries.findIndex(
+          (entry) => entry.originalIndex === formData.singleCorrectAnswer
+        );
+        if (selectedIndex === -1) {
+          alert("請選擇有效的正確答案");
+          return;
+        }
+        apiOptions = optionEntries.map((entry) => entry.value);
+        apiCorrectAnswer = selectedIndex;
       } else if (formData.type === "多選") {
-        apiCorrectAnswer = formData.correctAnswer;
-        apiOptions = formData.options.filter((opt) => opt.trim() !== "");
-        if (apiOptions.length < 2) {
-          alert("多選題至少需要2個選項");
+        const optionEntries = normalizeOptions(formData.options);
+        if (optionEntries.length < 2) {
+          alert("多選題至少需要 2 個選項");
           return;
         }
         if (formData.correctAnswer.length === 0) {
           alert("請至少選擇一個正確答案");
           return;
         }
-      } else {
-        // Fill type
-        apiCorrectAnswer = formData.singleCorrectAnswer;
-        apiFillOptions = formData.fillOptions.filter(
-          (opt) => opt.trim() !== ""
+        const mappedAnswers = formData.correctAnswer.map((answerIdx) =>
+          optionEntries.findIndex(
+            (entry) => entry.originalIndex === answerIdx
+          )
         );
-        if (apiFillOptions.length < 2) {
-          alert("填空題至少需要2個選項");
+        if (mappedAnswers.some((idx) => idx === -1)) {
+          alert("請確認勾選的選項皆有填寫內容");
           return;
         }
+        apiOptions = optionEntries.map((entry) => entry.value);
+        apiCorrectAnswer = [...mappedAnswers].sort((a, b) => a - b);
+      } else if (formData.type === "填空") {
+        const fillEntries = normalizeOptions(formData.fillOptions);
+        if (fillEntries.length < 3) {
+          alert("填空題至少需要 3 個選項");
+          return;
+        }
+        const selectedIndex = fillEntries.findIndex(
+          (entry) => entry.originalIndex === formData.singleCorrectAnswer
+        );
+        if (selectedIndex === -1) {
+          alert("請選擇有效的正確答案");
+          return;
+        }
+        apiFillOptions = fillEntries.map((entry) => entry.value);
+        apiCorrectAnswer = selectedIndex;
+      } else {
+        // 克漏字
+        const clozeOptions = formData.clozeOptions.map((opt) => opt.trim());
+        if (
+          clozeOptions.length < MIN_CLOZE_OPTIONS ||
+          clozeOptions.length > MAX_CLOZE_OPTIONS
+        ) {
+          alert("克漏字題選項數量需介於 1 至 6 之間");
+          return;
+        }
+        if (clozeOptions.some((opt) => opt.length === 0)) {
+          alert("克漏字題選項不可留空");
+          return;
+        }
+        const sanitizedOrder = sanitizeClozeOrder(
+          clozeOptions.length,
+          formData.clozeOrder
+        );
+        if (sanitizedOrder.length !== formData.clozeOrder.length) {
+          alert("克漏字題答案索引不可重複且需對應現有空格");
+          return;
+        }
+        if (sanitizedOrder.length < 1 || sanitizedOrder.length > clozeOptions.length) {
+          alert("克漏字題答案數量需介於 1 與選項數量之間");
+          return;
+        }
+        const uniqueOrder = new Set(sanitizedOrder);
+        if (uniqueOrder.size !== sanitizedOrder.length) {
+          alert("克漏字題答案順序不可重複");
+          return;
+        }
+        if (
+          sanitizedOrder.some((idx) => idx < 0 || idx >= clozeOptions.length)
+        ) {
+          alert("克漏字題答案索引超出範圍");
+          return;
+        }
+        apiOptions = clozeOptions;
+        apiCorrectAnswer = sanitizedOrder;
       }
 
       const questionData = {
@@ -553,12 +823,53 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                       <Label>題型 *</Label>
                       <Select
                         value={formData.type}
-                        onValueChange={(v) =>
-                          setFormData({
-                            ...formData,
-                            type: v as "單選" | "多選" | "填空",
-                          })
-                        }
+                        onValueChange={(v) => {
+                          const nextType = v as QuestionTypeLabel;
+                          setFormData((prev) => {
+                            if (prev.type === nextType) {
+                              return prev;
+                            }
+                            if (nextType === "單選") {
+                              return {
+                                ...prev,
+                                type: nextType,
+                                options: [...DEFAULT_SINGLE_OPTIONS],
+                                correctAnswer: [],
+                                singleCorrectAnswer: 0,
+                              };
+                            }
+                            if (nextType === "多選") {
+                              return {
+                                ...prev,
+                                type: nextType,
+                                options: [...DEFAULT_SINGLE_OPTIONS],
+                                correctAnswer: [],
+                                singleCorrectAnswer: 0,
+                              };
+                            }
+                            if (nextType === "填空") {
+                              return {
+                                ...prev,
+                                type: nextType,
+                                fillOptions: [...DEFAULT_FILL_OPTIONS],
+                                singleCorrectAnswer: 0,
+                              };
+                            }
+                            // 克漏字
+                            return {
+                              ...prev,
+                              type: nextType,
+                              clozeOptions: createClozeOptions(
+                                DEFAULT_CLOZE_OPTION_COUNT
+                              ),
+                              clozeOrder: createClozeOrder(
+                                DEFAULT_CLOZE_OPTION_COUNT
+                              ),
+                              correctAnswer: [],
+                              singleCorrectAnswer: 0,
+                            };
+                          });
+                        }}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -567,6 +878,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                           <SelectItem value="單選">單選題</SelectItem>
                           <SelectItem value="多選">多選題</SelectItem>
                           <SelectItem value="填空">填空題</SelectItem>
+                          <SelectItem value="克漏字">克漏字題</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -598,6 +910,51 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                             }}
                           />
                         ))}
+                      </div>
+                    )}
+
+                    {formData.type === "克漏字" && (
+                      <div className="space-y-2">
+                        <Label>克漏字選項（請輸入 1-6 個提示詞）*</Label>
+                        {formData.clozeOptions.map((opt, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <Input
+                              placeholder={`選項 ${idx + 1}`}
+                              value={opt}
+                              onChange={(e) =>
+                                handleClozeOptionChange(idx, e.target.value)
+                              }
+                            />
+                            {formData.clozeOptions.length > MIN_CLOZE_OPTIONS && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemoveClozeOption(idx)}
+                                className="text-red-500 hover:bg-red-50"
+                              >
+                                <Minus className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                        <div className="flex justify-end">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleAddClozeOption}
+                            disabled={
+                              formData.clozeOptions.length >= MAX_CLOZE_OPTIONS
+                            }
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            新增選項
+                          </Button>
+                        </div>
+                        <p className="text-xs text-[#636e72]">
+                          使用者需要依序選出正確答案，下方可設定正解順序。
+                        </p>
                       </div>
                     )}
 
@@ -715,6 +1072,92 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                               )
                           )}
                         </RadioGroup>
+                      )}
+                      {formData.type === "克漏字" && (
+                        <div className="space-y-3">
+                          <div className="flex justify-end">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  clozeOrder: createClozeOrder(
+                                    prev.clozeOptions.length
+                                  ),
+                                }))
+                              }
+                            >
+                              重設順序
+                            </Button>
+                          </div>
+                          {formData.clozeOrder.map((value, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-2"
+                            >
+                              <span className="w-16 text-sm text-[#636e72]">
+                                第 {idx + 1} 空
+                              </span>
+                              <Select
+                                value={String(value)}
+                                onValueChange={(v) => {
+                                  const parsed = parseInt(v, 10);
+                                  if (!Number.isNaN(parsed)) {
+                                    handleClozeOrderChange(idx, parsed);
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="選擇對應選項" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {formData.clozeOptions.map((opt, optIdx) => (
+                                    <SelectItem
+                                      key={optIdx}
+                                      value={String(optIdx)}
+                                      disabled={!opt.trim()}
+                                    >
+                                      {`${optIdx + 1}. ${
+                                        opt || `選項 ${optIdx + 1}`
+                                      }`}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {formData.clozeOrder.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleRemoveClozeBlank(idx)}
+                                  className="text-red-500 hover:bg-red-50"
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={handleAddClozeBlank}
+                              disabled={
+                                formData.clozeOrder.length >=
+                                formData.clozeOptions.length
+                              }
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              新增空格
+                            </Button>
+                          </div>
+                          <p className="text-xs text-[#636e72]">
+                            提示：順序需涵蓋全部空格且索引不可重複；如有變動，記得同步更新上方選項內容。
+                          </p>
+                        </div>
                       )}
                     </div>
 
@@ -946,6 +1389,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                     <SelectItem value="單選">單選題</SelectItem>
                     <SelectItem value="多選">多選題</SelectItem>
                     <SelectItem value="填空">填空題</SelectItem>
+                    <SelectItem value="克漏字">克漏字題</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -1007,12 +1451,38 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                                 #{startIndex + index + 1}
                               </TableCell>
                               <TableCell className="max-w-96">
-                                <div
-                                  className="truncate overflow-hidden text-ellipsis whitespace-nowrap"
+                                <div className="space-y-2">
+                                  <div
+                                    className="truncate overflow-hidden text-ellipsis whitespace-nowrap"
                                   title={q.question}
                                   style={{ maxWidth: "24rem" }}
                                 >
                                   {q.question}
+                                </div>
+                                  {q.type === "克漏字" &&
+                                    Array.isArray(q.correctAnswer) && (
+                                      <div className="text-xs text-[#636e72] space-y-1">
+                                        <div className="truncate">
+                                          選項：
+                                          {(q.options ?? [])
+                                            .map(
+                                              (opt, idx) =>
+                                                `${idx + 1}.${opt || "-"}`
+                                            )
+                                            .join("， ")}
+                                        </div>
+                                        <div>
+                                          正解順序：
+                                          {(q.correctAnswer as number[])
+                                            .map((idx) => {
+                                              const label =
+                                                q.options?.[idx] ?? "-";
+                                              return `${idx + 1}.${label}`;
+                                            })
+                                            .join(" → ")}
+                                        </div>
+                                      </div>
+                                    )}
                                 </div>
                               </TableCell>
                               <TableCell>

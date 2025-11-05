@@ -79,18 +79,6 @@ export function AdminLogin({ onLogin, onBack }: AdminLoginProps) {
       {/* Nature Accents */}
       <NatureAccents variant="minimal" />
 
-      {/* Back Button */}
-      <div className="absolute top-6 left-6">
-        <Button
-          onClick={onBack}
-          variant="ghost"
-          className="text-[#A8CBB7] hover:bg-[#F7E6C3]/20"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          返回首頁
-        </Button>
-      </div>
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -157,7 +145,7 @@ export function AdminLogin({ onLogin, onBack }: AdminLoginProps) {
             </div>
 
             {/* 記住帳號 */}
-                        <div className="flex items-center gap-2 text-sm text-[#2d3436] select-none">
+            <div className="flex items-center gap-2 text-sm text-[#2d3436] select-none">
               <Checkbox
                 id="remember"
                 checked={remember}

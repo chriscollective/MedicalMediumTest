@@ -211,7 +211,7 @@ export async function getQuizzes(req: Request, res: Response, next: NextFunction
 
 // 驗證答案是否正確
 function isAnswerCorrect(
-  questionType: 'single' | 'multiple' | 'fill',
+  questionType: 'single' | 'multiple' | 'fill' | 'cloze',
   userAnswer: number | number[] | null,
   correctAnswer: number | number[]
 ): boolean {
@@ -239,6 +239,23 @@ function isAnswerCorrect(
     }
 
     return sortedUser.every((val, idx) => val === sortedCorrect[idx]);
+  }
+
+  if (questionType === 'cloze') {
+    if (!Array.isArray(userAnswer) || !Array.isArray(correctAnswer)) {
+      return false;
+    }
+
+    if (userAnswer.length !== correctAnswer.length) {
+      return false;
+    }
+
+    return userAnswer.every(
+      (val, idx) =>
+        Number.isInteger(val) &&
+        Number.isInteger(correctAnswer[idx]) &&
+        val === correctAnswer[idx]
+    );
   }
 
   return false;

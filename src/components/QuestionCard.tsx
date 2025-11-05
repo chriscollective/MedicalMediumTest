@@ -4,15 +4,16 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { Badge } from "./ui/badge";
-import { Leaf } from "lucide-react";
+import { Leaf, X } from "lucide-react";
 
 export interface Question {
   id: string;
-  type: "single" | "multiple" | "fill";
+  type: "single" | "multiple" | "fill" | "cloze";
   question: string;
   options?: string[];
   fillOptions?: string[];
-  correctAnswer: string | string[];
+  clozeLength?: number;
+  correctAnswer?: string | string[];
   source?: string;
   explanation?: string;
 }
@@ -34,6 +35,22 @@ export function QuestionCard({
   const [selectedFill, setSelectedFill] = useState(
     question.type === "fill" && typeof userAnswer === "string" ? userAnswer : ""
   );
+
+  const clozeSelected =
+    question.type === "cloze" && Array.isArray(userAnswer)
+      ? (userAnswer as string[])
+      : [];
+
+  const CLOZE_MAX_SELECTION = 6;
+  const clozeTargetCount =
+    question.type === "cloze"
+      ? question.clozeLength && question.clozeLength > 0
+        ? question.clozeLength
+        : Math.min(
+            question.options?.length ?? CLOZE_MAX_SELECTION,
+            CLOZE_MAX_SELECTION
+          )
+      : 0;
 
   // 單選
   const handleSingleChoice = (value: string) => {
@@ -57,6 +74,20 @@ export function QuestionCard({
   const handleFillClick = (word: string) => {
     setSelectedFill(word);
     onAnswerChange(word);
+  };
+
+  const handleClozeSelect = (option: string) => {
+    if (question.type !== "cloze") return;
+    if (!question.options || clozeTargetCount === 0) return;
+    if (clozeSelected.includes(option)) return;
+    if (clozeSelected.length >= clozeTargetCount) return;
+    onAnswerChange([...clozeSelected, option]);
+  };
+
+  const handleClozeRemove = (slotIndex: number) => {
+    if (question.type !== "cloze") return;
+    const updated = clozeSelected.filter((_, idx) => idx !== slotIndex);
+    onAnswerChange(updated);
   };
 
   return (
@@ -165,6 +196,55 @@ export function QuestionCard({
               </div>
             </div>
           )}
+
+          {/* ✅ 克漏字題 */}
+          {question.type === "cloze" &&
+            question.options &&
+            clozeTargetCount > 0 && (
+              <div className="space-y-3">
+                <div className="p-4 bg-[#F7E6C3]/30 rounded-lg min-h-[60px] flex items-center flex-wrap gap-2">
+                  {clozeSelected.length === 0 ? (
+                    <span className="text-[#636e72] text-sm">
+                      請依序點選答案，可再點擊移除重選
+                    </span>
+                  ) : (
+                    clozeSelected.map((value, idx) => (
+                      <Badge
+                        key={`cloze-answer-${question.id}-${idx}`}
+                        className="bg-[#A8CBB7] text-white cursor-pointer flex items-center gap-2"
+                        onClick={() => handleClozeRemove(idx)}
+                      >
+                        <span>{value}</span>
+                        <X className="w-3 h-3 opacity-80" />
+                      </Badge>
+                    ))
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {question.options.map((option, idx) => {
+                    const selected = clozeSelected.includes(option);
+                    return (
+                      <Badge
+                        key={`cloze-option-${question.id}-${idx}`}
+                        className={`cursor-pointer transition-all duration-200 ${
+                          selected
+                            ? "bg-[#E5C17A] text-white shadow-md"
+                            : "border border-[#A8CBB7] hover:bg-[#F7E6C3]/50"
+                        }`}
+                        onClick={() => handleClozeSelect(option)}
+                      >
+                        {option}
+                      </Badge>
+                    );
+                  })}
+                </div>
+
+                <p className="text-xs text-[#636e72]">
+                  點擊選項加入、點擊上方答案移除。
+                </p>
+              </div>
+            )}
         </div>
       </div>
     </Card>

@@ -96,21 +96,24 @@ export function QuizPage({
 
         // 轉換 API 格式為 UI 格式
         const uiQuestions: Question[] = apiQuestions.map((q: ApiQuestion) => {
-          // 將數字索引轉換為實際的字串答案
-          let correctAnswerStr: string | string[];
+          let correctAnswerStr: string | string[] | undefined;
 
           if (q.type === "single") {
-            // 單選：從 options 取得對應索引的字串
             correctAnswerStr = q.options?.[q.correctAnswer as number] || "";
           } else if (q.type === "multiple") {
-            // 多選：從 options 取得所有索引對應的字串
             const indices = q.correctAnswer as number[];
             correctAnswerStr = indices
               .map((idx) => q.options?.[idx] || "")
               .filter(Boolean);
-          } else {
-            // 填空：從 fillOptions 取得對應索引的字串
+          } else if (q.type === "fill") {
             correctAnswerStr = q.fillOptions?.[q.correctAnswer as number] || "";
+          } else if (q.type === "cloze") {
+            const indices = Array.isArray(q.correctAnswer)
+              ? (q.correctAnswer as number[])
+              : [];
+            correctAnswerStr = indices
+              .map((idx) => q.options?.[idx] || "")
+              .filter(Boolean);
           }
 
           return {
@@ -119,6 +122,10 @@ export function QuizPage({
             question: q.question,
             options: q.options,
             fillOptions: q.fillOptions,
+            clozeLength:
+              q.type === "cloze" && Array.isArray(q.correctAnswer)
+                ? (q.correctAnswer as number[]).length
+                : undefined,
             correctAnswer: correctAnswerStr,
             source: q.source,
             explanation: q.explanation,
@@ -194,10 +201,19 @@ export function QuizPage({
         const answer = answers[question.id];
 
         // 檢查答案是否存在且有效
-        const isAnswered =
-          answer !== undefined &&
-          answer !== null &&
-          (Array.isArray(answer) ? answer.length > 0 : answer !== "");
+        let isAnswered = false;
+        if (question.type === "cloze") {
+          const expectedLength =
+            question.clozeLength ?? question.options?.length ?? 0;
+          const answerArray = Array.isArray(answer)
+            ? (answer as string[])
+            : [];
+          isAnswered = expectedLength > 0 && answerArray.length === expectedLength;
+        } else if (Array.isArray(answer)) {
+          isAnswered = answer.length > 0;
+        } else {
+          isAnswered = answer !== undefined && answer !== null && answer !== "";
+        }
 
         if (!isAnswered) {
           unansweredQuestions.push(index + 1); // 題號從 1 開始
@@ -270,6 +286,13 @@ export function QuizPage({
             const index =
               question.fillOptions?.indexOf(userAnswer as string) ?? -1;
             convertedAnswer = index >= 0 ? index : null;
+          } else if (question.type === "cloze") {
+            const selectedOptions = Array.isArray(userAnswer)
+              ? (userAnswer as string[])
+              : [];
+            convertedAnswer = selectedOptions
+              .map((opt) => question.options?.indexOf(opt) ?? -1)
+              .filter((idx) => idx >= 0);
           }
         }
 
@@ -333,10 +356,16 @@ export function QuizPage({
         let isCorrect = false;
         if (question.type === "multiple") {
           const userArr = (userAnswer as string[]) || [];
-          const correctArr = correctAnswer as string[];
+          const correctArr = (correctAnswer as string[]) || [];
           isCorrect =
             userArr.length === correctArr.length &&
             userArr.every((a) => correctArr.includes(a));
+        } else if (question.type === "cloze") {
+          const userArr = (userAnswer as string[]) || [];
+          const correctArr = (correctAnswer as string[]) || [];
+          isCorrect =
+            userArr.length === correctArr.length &&
+            userArr.every((val, idx) => val === correctArr[idx]);
         } else {
           isCorrect = userAnswer === correctAnswer;
         }

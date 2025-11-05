@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IQuestion extends Document {
-  type: "single" | "multiple" | "fill";
+  type: "single" | "multiple" | "fill" | "cloze";
   question: string;
   options?: string[];
   fillOptions?: string[];
@@ -21,7 +21,7 @@ const QuestionSchema: Schema = new Schema(
   {
     type: {
       type: String,
-      enum: ["single", "multiple", "fill"],
+      enum: ["single", "multiple", "fill", "cloze"],
       required: true,
       index: true,
     },
@@ -38,9 +38,17 @@ const QuestionSchema: Schema = new Schema(
           if (this.type === "single" || this.type === "multiple") {
             return v && v.length >= 2 && v.length <= 10;
           }
+          if (this.type === "cloze") {
+            return (
+              Array.isArray(v) &&
+              v.length >= 1 &&
+              v.length <= 6 &&
+              v.every((opt) => typeof opt === "string" && opt.trim().length > 0)
+            );
+          }
           return true;
         },
-        message: "單選/多選題必須有 2-10 個選項",
+        message: "單選/多選題必須有 2-10 個選項；克漏字題需提供 1-6 個非空選項",
       },
     },
     fillOptions: {
@@ -70,9 +78,28 @@ const QuestionSchema: Schema = new Schema(
               v.every((x: any) => typeof x === "number" && x >= 0)
             );
           }
+          if (this.type === "cloze") {
+            if (!Array.isArray(v)) {
+              return false;
+            }
+            const optionLength = Array.isArray(this.options) ? this.options.length : 0;
+            if (optionLength < 1 || optionLength > 6) {
+              return false;
+            }
+            if (v.length < 1 || v.length > optionLength) {
+              return false;
+            }
+            const uniqueIndices = new Set(v);
+            const validRange = v.every(
+              (idx: any) =>
+                Number.isInteger(idx) && idx >= 0 && idx < optionLength
+            );
+            return validRange && uniqueIndices.size === v.length;
+          }
           return false;
         },
-        message: "答案格式不正確：單選/填空需要數字 index，多選需要數字陣列",
+        message:
+          "答案格式不正確：單選/填空需要數字 index，多選需要數字陣列，克漏字題需提供 1~選項數量的唯一索引陣列",
       },
     },
     source: {

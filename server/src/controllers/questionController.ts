@@ -1,6 +1,162 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthRequest } from "../middleware/auth";
-import Question from "../models/Question";
+import Question, { IQuestion } from "../models/Question";
+
+function normalizeQuestionPayload(
+  body: any,
+  actor: string,
+  existing?: IQuestion
+) {
+  const payload: any = { ...body };
+  const type = payload.type || existing?.type;
+
+  if (!type) {
+    throw new Error("題目類型為必填");
+  }
+
+  payload.type = type;
+  payload.updatedBy = actor;
+
+  const ensureNumberArray = (value: any): number[] => {
+    if (!Array.isArray(value)) {
+      throw new Error("答案必須是陣列");
+    }
+    const result = value.map((v) => {
+      const num = typeof v === "string" ? Number(v) : v;
+      if (!Number.isInteger(num)) {
+        throw new Error("答案必須為整數索引");
+      }
+      return num;
+    });
+    return result;
+  };
+
+  switch (type) {
+    case "single": {
+      if (!Array.isArray(payload.options) || payload.options.length < 2) {
+        throw new Error("單選題需要至少 2 個選項");
+      }
+      payload.options = payload.options.map((opt: any) => String(opt ?? "").trim());
+      const answer =
+        payload.correctAnswer !== undefined
+          ? payload.correctAnswer
+          : existing?.correctAnswer;
+      if (answer === undefined || answer === null) {
+        throw new Error("單選題需要提供正確答案索引");
+      }
+      const numericAnswer =
+        typeof answer === "string" ? Number(answer) : Number(answer);
+      if (!Number.isInteger(numericAnswer) || numericAnswer < 0) {
+        throw new Error("單選題正確答案必須為非負整數索引");
+      }
+      if (numericAnswer >= payload.options.length) {
+        throw new Error("單選題正確答案索引超出選項範圍");
+      }
+      payload.correctAnswer = numericAnswer;
+      payload.fillOptions = [];
+      break;
+    }
+    case "multiple": {
+      if (!Array.isArray(payload.options) || payload.options.length < 2) {
+        throw new Error("多選題需要至少 2 個選項");
+      }
+      payload.options = payload.options.map((opt: any) => String(opt ?? "").trim());
+      const answers = ensureNumberArray(
+        payload.correctAnswer !== undefined
+          ? payload.correctAnswer
+          : existing?.correctAnswer
+      );
+      if (answers.length === 0) {
+        throw new Error("多選題需要至少一個正確選項");
+      }
+      const optionLength = payload.options.length;
+      const dedupedAnswers = Array.from(new Set(answers));
+      if (dedupedAnswers.some((idx) => idx < 0 || idx >= optionLength)) {
+        throw new Error("多選題答案索引超出選項範圍");
+      }
+      payload.correctAnswer = dedupedAnswers.sort((a, b) => a - b);
+      payload.fillOptions = [];
+      break;
+    }
+    case "fill": {
+      const fillOptions =
+        Array.isArray(payload.fillOptions) && payload.fillOptions.length > 0
+          ? payload.fillOptions
+          : existing?.fillOptions;
+      if (!fillOptions || fillOptions.length < 3) {
+        throw new Error("填空題需要至少 3 個填答選項");
+      }
+      payload.fillOptions = fillOptions.map((opt: any) => String(opt ?? "").trim());
+      payload.options = [];
+      const answer =
+        payload.correctAnswer !== undefined
+          ? payload.correctAnswer
+          : existing?.correctAnswer;
+      if (answer === undefined || answer === null) {
+        throw new Error("填空題需要提供正確答案索引");
+      }
+      const numericAnswer =
+        typeof answer === "string" ? Number(answer) : Number(answer);
+      if (!Number.isInteger(numericAnswer) || numericAnswer < 0) {
+        throw new Error("填空題正確答案必須為非負整數索引");
+      }
+      if (numericAnswer >= payload.fillOptions.length) {
+        throw new Error("填空題正確答案索引超出選項範圍");
+      }
+      payload.correctAnswer = numericAnswer;
+      break;
+    }
+    case "cloze": {
+      if (!Array.isArray(payload.options)) {
+        payload.options = existing?.options ?? [];
+      }
+      payload.options = payload.options.map((opt: any) =>
+        String(opt ?? "").trim()
+      );
+      const optionCount = payload.options.length;
+      if (
+        optionCount < 1 ||
+        optionCount > 6 ||
+        payload.options.some((opt: string) => opt.length === 0)
+      ) {
+        throw new Error("克漏字題需提供 1-6 個非空選項");
+      }
+      const answers = ensureNumberArray(
+        payload.correctAnswer !== undefined
+          ? payload.correctAnswer
+          : existing?.correctAnswer
+      );
+      if (answers.length < 1 || answers.length > optionCount) {
+        throw new Error("克漏字題答案數量需介於 1 與選項數量之間");
+      }
+      const unique = new Set(answers);
+      const validRange = answers.every(
+        (idx) => idx >= 0 && idx < optionCount
+      );
+      if (!validRange || unique.size !== answers.length) {
+        throw new Error("克漏字題答案索引必須介於 0-選項數量-1 且不可重複");
+      }
+      payload.correctAnswer = answers;
+      payload.fillOptions = [];
+      break;
+    }
+    default:
+      throw new Error("不支援的題目類型");
+  }
+
+  // 一般欄位正規化
+  if (payload.question) {
+    payload.question = String(payload.question).trim();
+  }
+  if (payload.source) {
+    payload.source = String(payload.source).trim();
+  }
+  if (payload.explanation) {
+    payload.explanation = String(payload.explanation).trim();
+  }
+
+  return payload;
+}
 
 /**
  * 題目控制器（Question Controller）
@@ -92,7 +248,9 @@ export async function createQuestion(
 ) {
   try {
     const actor = req.admin?.username || "system";
-    const payload: any = { ...req.body, createdBy: actor, updatedBy: actor };
+    const payload = normalizeQuestionPayload(req.body, actor);
+    payload.createdBy = actor;
+
     const question = await Question.create(payload);
     res.status(201).json({
       success: true,
@@ -100,6 +258,12 @@ export async function createQuestion(
       message: "Question created successfully",
     });
   } catch (error) {
+    if (error instanceof Error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
     next(error);
   }
 }
@@ -125,8 +289,11 @@ export async function updateQuestion(
       });
     }
 
+    const actor = req.admin?.username || "system";
+    const payload = normalizeQuestionPayload(req.body, actor, question);
+
     // 合併更新欄位（如需限制可於此處白名單化）
-    Object.assign(question, req.body);
+    Object.assign(question, payload);
 
     // 儲存（會觸發 Mongoose 驗證與 timestamps 更新）
     await question.save();
@@ -137,6 +304,12 @@ export async function updateQuestion(
       message: "Question updated successfully",
     });
   } catch (error) {
+    if (error instanceof Error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
     next(error);
   }
 }
