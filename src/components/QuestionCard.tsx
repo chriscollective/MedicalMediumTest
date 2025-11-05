@@ -211,11 +211,13 @@ export function QuestionCard({
                     clozeSelected.map((value, idx) => (
                       <Badge
                         key={`cloze-answer-${question.id}-${idx}`}
-                        className="bg-[#A8CBB7] text-white cursor-pointer flex items-center gap-2"
+                        className="bg-[#A8CBB7] text-white cursor-pointer"
                         onClick={() => handleClozeRemove(idx)}
                       >
-                        <span>{value}</span>
-                        <X className="w-3 h-3 opacity-80" />
+                        {clozeSelected.length > 1 && (
+                          <span className="mr-1 font-semibold">{idx + 1}.</span>
+                        )}
+                        {value}
                       </Badge>
                     ))
                   )}
