@@ -4,8 +4,10 @@
 
 [![React](https://img.shields.io/badge/React-18.3-61dafb?logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178c6?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.3-646CFF?logo=vite)](https://vitejs.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js)](https://nodejs.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb)](https://www.mongodb.com/atlas)
+[![Express](https://img.shields.io/badge/Express-5.1-000000?logo=express)](https://expressjs.com/)
 
 ## 📖 專案簡介
 
@@ -15,6 +17,7 @@
 
 - 🎯 **多書籍測驗系統** - 支援單本或多本書籍混合出題
 - 📊 **雙難度選擇** - 初階與進階難度適合不同程度讀者
+- 📝 **四種題型支援** - 單選、多選、填空、克漏字多樣化測驗體驗
 - 🎨 **精美自然風格 UI** - 採用自然主題色彩與流暢動畫效果
 - 💯 **智能評分系統** - 自動計算分數並給予等級評定（S/A+/A/B+/B/C+/F）
 - 📈 **統計分析儀表板** - 完整的資料視覺化與錯題分析
@@ -22,13 +25,38 @@
 - 🔐 **管理後台** - JWT 認證的安全管理系統
 - 📝 **題庫管理** - 完整的 CRUD 功能管理測驗題目
 
+### 📝 題型系統
+
+本應用程式支援四種不同的題型，提供多樣化的測驗體驗：
+
+#### 1️⃣ 單選題（Single Choice）
+- 從多個選項中選擇一個正確答案
+- 適合測試明確的知識點
+- 使用 RadioGroup 組件實現
+
+#### 2️⃣ 多選題（Multiple Choice）
+- 從多個選項中選擇所有正確答案
+- 所有正確答案都必須選中才算正確
+- 使用 Checkbox 組件實現
+
+#### 3️⃣ 填空題（Fill-in-the-Blank）
+- 從提供的詞彙列表中選擇一個詞填入空白處
+- 提供 3-20 個候選詞彙
+- 適合測試特定術語或概念
+
+#### 4️⃣ 克漏字題（Cloze Test）
+- 依序選擇多個答案（最多 6 個）填入文章或句子中的空白處
+- 順序很重要，必須按照正確順序選擇
+- 點擊選項加入答案，點擊已選答案可移除重選
+- 適合測試對段落或句子結構的理解
+
 ## 🎬 功能展示
 
 ### 使用者端功能
 
 - ✅ 書籍與難度選擇
 - ✅ 分頁式測驗介面（每頁 5 題）
-- ✅ 三種題型：單選、多選、填空
+- ✅ 四種題型：單選、多選、填空、克漏字
 - ✅ 即時答題狀態追蹤
 - ✅ 成績結算與等級評定
 - ✅ 錯題回顧與詳解
@@ -88,7 +116,7 @@
 
 ```bash
 git clone <repository-url>
-cd MMQuiz
+cd MedicalMediumTest
 ```
 
 2. **安裝依賴**
@@ -168,7 +196,7 @@ npm run dev
 ## 📁 專案結構
 
 ```
-MMQuiz/
+MedicalMediumTest/
 ├── src/                          # 前端原始碼
 │   ├── components/               # React 組件
 │   │   ├── ui/                  # shadcn/ui 基礎組件
@@ -295,8 +323,11 @@ npm run server:start
 ### 資料庫工具
 
 ```bash
-# 遷移題目資料
+# 遷移題目資料到 MongoDB
 npm run migrate:questions
+
+# 複製填空題轉換為克漏字題
+npm run clone:fill-to-cloze
 ```
 
 ## 💾 資料庫結構
@@ -305,19 +336,42 @@ npm run migrate:questions
 
 #### questions（題目）
 
-儲存所有測驗題目，包含三種題型。
+儲存所有測驗題目，支援四種題型：
+
+- **single（單選題）**：從選項中選擇一個正確答案
+- **multiple（多選題）**：從選項中選擇多個正確答案
+- **fill（填空題）**：從多個選項中選擇一個填入空白處
+- **cloze（克漏字題）**：依序選擇多個答案填入文章中的空白處
+
+主要欄位：
+- `type`: 題目類型
+- `question`: 題目內容
+- `options`: 選項陣列（單選/多選/克漏字使用）
+- `fillOptions`: 填空選項陣列（填空題使用）
+- `correctAnswer`: 正確答案索引（number 或 number[]）
+- `book`: 所屬書籍
+- `difficulty`: 難度（初階/進階）
+- `explanation`: 題目解析
 
 #### quizzes（測驗記錄）
 
-記錄每次測驗的詳細資訊，包含答題狀態、成績等。
+記錄每次測驗的詳細資訊：
+- `userId`: 使用者 ID（UUID）
+- `book`: 書籍名稱
+- `questions`: 題目 ID 陣列
+- `answers`: 使用者答案
+- `answerBitmap`: 答題結果位元圖（'1'=正確，'0'=錯誤）
+- `correctCount`: 答對題數
+- `grade`: 等級評定（S/A+/A/B+/B/C+/F）
+- `completedAt`: 完成時間
 
 #### leaderboards（排行榜）
 
-儲存玩家的最佳成績，用於全域排行榜顯示。
+儲存玩家的最佳成績，用於全域排行榜顯示。每個書籍顯示 Top 100 名。
 
 #### admins（管理員）
 
-管理員帳號資訊，密碼使用 bcrypt 加密。
+管理員帳號資訊，密碼使用 bcrypt 加密儲存。
 
 #### books（書籍）
 
@@ -335,17 +389,20 @@ npm run migrate:questions
   - 強調色：暖米金 (#E5C17A)
   - 背景：灰白 (#FAFAF7)
   - 次要色：淺奶油 (#F7E6C3)
+  - 文字：深灰 (#2d3436)、中灰 (#636e72)
 
 - **動畫效果**
 
-  - 使用 Framer Motion 實現流暢轉場
-  - 頁面切換具有方向性動畫
+  - 使用 Framer Motion（motion/react）實現流暢轉場
+  - 頁面切換具有方向性動畫（AnimatePresence）
   - 交錯式列表載入效果
+  - 懸停效果和微交互
 
 - **使用者體驗**
   - 響應式設計，支援各種螢幕尺寸
   - 清晰的視覺回饋
   - 無障礙設計（使用 Radix UI）
+  - 自然主題裝飾元素（植物、草本 SVG）
 
 ## 🔐 安全性
 
@@ -396,6 +453,63 @@ JWT_SECRET=<your-secret-key>
 npm run server:start
 ```
 
+## 🏗️ 應用程式架構
+
+### 前端架構
+
+本專案採用**單頁應用程式（SPA）架構**，使用手動路由而非路由庫：
+
+- **App.tsx** 作為中央狀態管理器和頁面路由器
+- 使用 `currentPage` 狀態控制渲染哪個頁面組件
+- 維護 `quizState` 用於測驗數據（書籍、難度、答案、分數）
+- 處理 8 個頁面之間的導航：landing、quiz、result、admin-login、admin-dashboard、analytics、questions、leaderboard
+
+### 後端架構
+
+採用經典的 **MVC 架構**：
+
+- **Models（資料模型）**：使用 Mongoose 定義 MongoDB 資料結構
+- **Routes（路由）**：定義 API 端點和 HTTP 方法
+- **Controllers（控制器）**：處理業務邏輯
+- **Middleware（中間件）**：處理認證、錯誤處理等橫切關注點
+
+### 服務層
+
+前端使用服務層（`src/services/`）封裝所有 API 呼叫：
+
+- 統一的 Axios 實例配置
+- 請求/回應攔截器處理 Token 和錯誤
+- 類型安全的 API 接口
+- 自動處理 API 失敗時的降級邏輯
+
+### 答案格式與評分邏輯
+
+#### 答案格式轉換
+
+- **前端 UI**：使用字串（string）或字串陣列（string[]）表示答案
+- **後端/資料庫**：使用數字索引（number）或數字索引陣列（number[]）表示答案
+- **QuizPage** 負責在提交時進行格式轉換
+
+#### 評分規則
+
+分數計算位於 App.tsx 的 `handleQuizComplete` 函數：
+
+- **單選題/填空題**：直接字串比較，完全相同才算正確
+- **多選題**：陣列長度相等 + 所有元素匹配（順序無關）
+- **克漏字題**：陣列長度相等 + 所有元素匹配 + **順序必須一致**
+
+#### 等級評定標準
+
+總共 20 題，根據答對題數給予等級：
+
+- **S 級**：18-20 題正確（90-100%）
+- **A+ 級**：17 題正確（85%）
+- **A 級**：15-16 題正確（75-80%）
+- **B+ 級**：13-14 題正確（65-70%）
+- **B 級**：11-12 題正確（55-60%）
+- **C+ 級**：9-10 題正確（45-50%）
+- **F 級**：0-8 題正確（0-40%）
+
 ## 📝 開發指南
 
 ### 新增題目
@@ -403,8 +517,10 @@ npm run server:start
 1. 登入管理後台
 2. 進入「題目管理」
 3. 點擊「新增題目」
-4. 填寫題目資訊並選擇題型
-5. 設定正確答案與解析
+4. 選擇題型（單選/多選/填空/克漏字）
+5. 填寫題目資訊和選項
+6. 設定正確答案與解析
+7. 指定書籍來源和難度
 
 ### 新增書籍
 
@@ -426,14 +542,46 @@ A: 請確認 `.env` 中的 `MONGODB_URI` 設定正確，且 MongoDB Atlas 已允
 A: 檢查 `VITE_API_URL` 環境變數是否正確設定，確保後端伺服器已啟動。
 
 **Q: 忘記管理員密碼？**
-A: 執行 `tsx server/src/scripts/reset-admin.ts` 重設管理員密碼。
+A: 執行 `tsx server/src/scripts/reset-admin.ts` 重設管理員密碼（如果該腳本存在）。
 
 **Q: 題目不足 20 題無法開始測驗？**
 A: 請確保資料庫中對應書籍與難度的題目數量至少有 20 題。
 
+**Q: 克漏字題型如何運作？**
+A: 克漏字題需要使用者依序選擇多個答案。點擊下方選項將其加入答案序列，點擊上方已選擇的答案可以移除。順序很重要，必須與正確答案的順序完全一致才算正確。
+
+**Q: 如何轉換填空題為克漏字題？**
+A: 執行 `npm run clone:fill-to-cloze` 腳本，可將現有的填空題複製並轉換為克漏字題格式。
+
+## 📝 更新日誌
+
+### 最新版本
+
+#### 新增功能
+- ✅ **克漏字題型**：新增第四種題型，支援依序選擇多個答案
+- ✅ **題型轉換工具**：新增 `clone:fill-to-cloze` 腳本，可將填空題轉換為克漏字題
+- ✅ **克漏字順序號碼**：克漏字題會顯示選擇順序編號，讓使用者清楚看到答案順序
+- ✅ **資料庫索引優化**：新增複合索引提升查詢效能（book + difficulty + type）
+- ✅ **題目歷史記錄**：追蹤題目的建立者和修改歷史
+
+#### 已完成功能
+- ✅ 多書籍選擇與測驗系統
+- ✅ 雙難度系統（初階/進階）
+- ✅ 四種題型（單選、多選、填空、克漏字）
+- ✅ 分頁測驗介面
+- ✅ 成績計算與等級評定
+- ✅ 錯題回顧與解析
+- ✅ MongoDB Atlas 資料庫整合
+- ✅ RESTful API 架構
+- ✅ JWT 管理員認證系統
+- ✅ 題目管理（CRUD）
+- ✅ 書籍管理
+- ✅ 統計分析儀表板
+- ✅ 全域排行榜系統
+
 ## 📄 授權
 
-本專案採用 MIT 授權條款。詳見 [LICENSE](./LICENSE) 檔案。
+本專案為私人專案，未公開授權。
 
 ## 🙏 致謝
 
