@@ -63,9 +63,8 @@ interface QuestionBankProps {
 interface ApiQuestion {
   _id: string;
   question: string;
-  type: "single" | "multiple" | "fill" | "cloze";
+  type: "single" | "multiple" | "cloze";
   options?: string[];
-  fillOptions?: string[];
   correctAnswer: number | number[];
   book: string;
   difficulty: string;
@@ -225,9 +224,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
       const apiQuestions = await fetchQuestions({ limit: 1000 });
 
       // Convert API format to UI format
-      const uiQuestions: QuestionData[] = apiQuestions
-        .filter((q) => q.type !== "fill")
-        .map((q: ApiQuestion) => ({
+      const uiQuestions: QuestionData[] = apiQuestions.map((q: ApiQuestion) => ({
           id: q._id,
           question: q.question,
           type: typeMapping[q.type] ?? "單選",

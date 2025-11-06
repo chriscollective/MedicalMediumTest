@@ -157,10 +157,9 @@ server/
 ```typescript
 interface Question {
   id: string;
-  type: 'single' | 'multiple' | 'fill';
+  type: 'single' | 'multiple' | 'cloze';
   question: string;
-  options?: string[];          // 用於單選/多選題
-  fillOptions?: string[];      // 用於填空題
+  options?: string[];
   correctAnswer: string | string[];
   source?: string;             // 書籍來源
   explanation?: string;
@@ -170,7 +169,7 @@ interface Question {
 **題目類型：**
 1. **single**：單選按鈕（一個答案）
 2. **multiple**：複選框（多個正確答案）
-3. **fill**：點擊選擇填空（顯示為徽章）
+3. **cloze**：克漏字題（依序選擇多個答案）
 
 **資料來源：**
 - 題目儲存在 MongoDB Atlas 資料庫中
@@ -302,10 +301,9 @@ VITE_API_URL=http://localhost:5000/api
 
 **questions** - 題目資料
 - `_id`: ObjectId
-- `type`: 'single' | 'multiple' | 'fill'
+- `type`: 'single' | 'multiple' | 'cloze'
 - `question`: 題目文字
-- `options`: 選項陣列（單選/多選）
-- `fillOptions`: 填空選項陣列
+- `options`: 選項陣列
 - `correctAnswer`: number | number[]（正確答案索引）
 - `source`: 書籍來源
 - `difficulty`: '初階' | '進階'

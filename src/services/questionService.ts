@@ -114,10 +114,9 @@ export async function fetchMixedQuizQuestions(
 }
 
 export async function createQuestion(data: {
-  type: 'single' | 'multiple' | 'fill' | 'cloze';
+  type: 'single' | 'multiple' | 'cloze';
   question: string;
   options?: string[];
-  fillOptions?: string[];
   correctAnswer: number | number[];
   source?: string;
   explanation?: string;
@@ -129,10 +128,9 @@ export async function createQuestion(data: {
 }
 
 export async function updateQuestion(id: string, data: {
-  type?: 'single' | 'multiple' | 'fill' | 'cloze';
+  type?: 'single' | 'multiple' | 'cloze';
   question?: string;
   options?: string[];
-  fillOptions?: string[];
   correctAnswer?: number | number[];
   source?: string;
   explanation?: string;

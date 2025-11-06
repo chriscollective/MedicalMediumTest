@@ -105,8 +105,6 @@ export function QuizPage({
             correctAnswerStr = indices
               .map((idx) => q.options?.[idx] || "")
               .filter(Boolean);
-          } else if (q.type === "fill") {
-            correctAnswerStr = q.fillOptions?.[q.correctAnswer as number] || "";
           } else if (q.type === "cloze") {
             const indices = Array.isArray(q.correctAnswer)
               ? (q.correctAnswer as number[])
@@ -121,7 +119,6 @@ export function QuizPage({
             type: q.type,
             question: q.question,
             options: q.options,
-            fillOptions: q.fillOptions,
             clozeLength:
               q.type === "cloze" && Array.isArray(q.correctAnswer)
                 ? (q.correctAnswer as number[]).length
@@ -281,11 +278,6 @@ export function QuizPage({
             convertedAnswer = selectedOptions
               .map((opt) => question.options?.indexOf(opt) ?? -1)
               .filter((idx) => idx >= 0);
-          } else if (question.type === "fill") {
-            // 填空：找到填空選項的 index
-            const index =
-              question.fillOptions?.indexOf(userAnswer as string) ?? -1;
-            convertedAnswer = index >= 0 ? index : null;
           } else if (question.type === "cloze") {
             const selectedOptions = Array.isArray(userAnswer)
               ? (userAnswer as string[])

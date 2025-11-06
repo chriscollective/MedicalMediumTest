@@ -1,10 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IQuestion extends Document {
-  type: "single" | "multiple" | "fill" | "cloze";
+  type: "single" | "multiple" | "cloze";
   question: string;
   options?: string[];
-  fillOptions?: string[];
   correctAnswer: number | number[];
   source?: string;
   explanation?: string;
@@ -22,7 +21,7 @@ const QuestionSchema: Schema = new Schema(
   {
     type: {
       type: String,
-      enum: ["single", "multiple", "fill", "cloze"],
+      enum: ["single", "multiple", "cloze"],
       required: true,
       index: true,
     },
@@ -52,24 +51,12 @@ const QuestionSchema: Schema = new Schema(
         message: "單選/多選題必須有 2-10 個選項；克漏字題需提供 1-6 個非空選項",
       },
     },
-    fillOptions: {
-      type: [String],
-      validate: {
-        validator: function (this: IQuestion, v: string[]) {
-          if (this.type === "fill") {
-            return v && v.length >= 3 && v.length <= 20;
-          }
-          return true;
-        },
-        message: "填空題必須有 3-20 個答案選項",
-      },
-    },
     correctAnswer: {
       type: Schema.Types.Mixed,
       required: true,
       validate: {
         validator: function (this: IQuestion, v: any) {
-          if (this.type === "single" || this.type === "fill") {
+          if (this.type === "single") {
             return typeof v === "number" && v >= 0;
           }
           if (this.type === "multiple") {
@@ -100,7 +87,7 @@ const QuestionSchema: Schema = new Schema(
           return false;
         },
         message:
-          "答案格式不正確：單選/填空需要數字 index，多選需要數字陣列，克漏字題需提供 1~選項數量的唯一索引陣列",
+          "答案格式不正確：單選需要數字 index，多選需要數字陣列，克漏字題需提供 1~選項數量的唯一索引陣列",
       },
     },
     source: {

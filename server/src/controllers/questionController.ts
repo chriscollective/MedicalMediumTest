@@ -53,7 +53,6 @@ function normalizeQuestionPayload(
         throw new Error("單選題正確答案索引超出選項範圍");
       }
       payload.correctAnswer = numericAnswer;
-      payload.fillOptions = [];
       break;
     }
     case "multiple": {
@@ -75,35 +74,6 @@ function normalizeQuestionPayload(
         throw new Error("多選題答案索引超出選項範圍");
       }
       payload.correctAnswer = dedupedAnswers.sort((a, b) => a - b);
-      payload.fillOptions = [];
-      break;
-    }
-    case "fill": {
-      const fillOptions =
-        Array.isArray(payload.fillOptions) && payload.fillOptions.length > 0
-          ? payload.fillOptions
-          : existing?.fillOptions;
-      if (!fillOptions || fillOptions.length < 3) {
-        throw new Error("填空題需要至少 3 個填答選項");
-      }
-      payload.fillOptions = fillOptions.map((opt: any) => String(opt ?? "").trim());
-      payload.options = [];
-      const answer =
-        payload.correctAnswer !== undefined
-          ? payload.correctAnswer
-          : existing?.correctAnswer;
-      if (answer === undefined || answer === null) {
-        throw new Error("填空題需要提供正確答案索引");
-      }
-      const numericAnswer =
-        typeof answer === "string" ? Number(answer) : Number(answer);
-      if (!Number.isInteger(numericAnswer) || numericAnswer < 0) {
-        throw new Error("填空題正確答案必須為非負整數索引");
-      }
-      if (numericAnswer >= payload.fillOptions.length) {
-        throw new Error("填空題正確答案索引超出選項範圍");
-      }
-      payload.correctAnswer = numericAnswer;
       break;
     }
     case "cloze": {
@@ -137,7 +107,6 @@ function normalizeQuestionPayload(
         throw new Error("克漏字題答案索引必須介於 0-選項數量-1 且不可重複");
       }
       payload.correctAnswer = answers;
-      payload.fillOptions = [];
       break;
     }
     default:

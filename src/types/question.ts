@@ -1,4 +1,4 @@
-export type QuestionType = 'single' | 'multiple' | 'fill' | 'cloze';
+export type QuestionType = 'single' | 'multiple' | 'cloze';
 export type Difficulty = '初階' | '進階';
 
 export type Question =
@@ -7,7 +7,6 @@ export type Question =
       type: 'single';
       question: string;
       options: string[];
-      fillOptions?: string[];
       correctAnswer: number;
       source?: string;
       explanation?: string;
@@ -24,7 +23,6 @@ export type Question =
       type: 'multiple';
       question: string;
       options: string[];
-      fillOptions?: string[];
       correctAnswer: number[];
       source?: string;
       explanation?: string;
@@ -41,7 +39,6 @@ export type Question =
       type: 'cloze';
       question: string;
       options: string[];
-      fillOptions?: string[];
       correctAnswer: number[];
       source?: string;
       explanation?: string;

@@ -8,10 +8,9 @@ import { Leaf, X } from "lucide-react";
 
 export interface Question {
   id: string;
-  type: "single" | "multiple" | "fill" | "cloze";
+  type: "single" | "multiple" | "cloze";
   question: string;
   options?: string[];
-  fillOptions?: string[];
   clozeLength?: number;
   correctAnswer?: string | string[];
   source?: string;
@@ -31,11 +30,6 @@ export function QuestionCard({
   userAnswer,
   onAnswerChange,
 }: QuestionCardProps) {
-  // ✅ 僅在填空題初始化狀態
-  const [selectedFill, setSelectedFill] = useState(
-    question.type === "fill" && typeof userAnswer === "string" ? userAnswer : ""
-  );
-
   const clozeSelected =
     question.type === "cloze" && Array.isArray(userAnswer)
       ? (userAnswer as string[])
@@ -68,12 +62,6 @@ export function QuestionCard({
         ? [...current, option]
         : current.filter((a) => a !== option);
     onAnswerChange(updated);
-  };
-
-  // 填空
-  const handleFillClick = (word: string) => {
-    setSelectedFill(word);
-    onAnswerChange(word);
   };
 
   const handleClozeSelect = (option: string) => {
@@ -160,40 +148,6 @@ export function QuestionCard({
                   </div>
                 );
               })}
-            </div>
-          )}
-
-          {/* ✅ 填空題 */}
-          {question.type === "fill" && question.fillOptions && (
-            <div className="space-y-3">
-              <div className="p-4 bg-[#F7E6C3]/30 rounded-lg min-h-[60px] flex items-center justify-center">
-                {selectedFill ? (
-                  <Badge className="bg-[#A8CBB7] text-white">
-                    {selectedFill}
-                  </Badge>
-                ) : (
-                  <span className="text-[#636e72] text-sm">請選擇答案</span>
-                )}
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {question.fillOptions.map((word, idx) => {
-                  const active = selectedFill === word;
-                  return (
-                    <Badge
-                      key={`fill-${index}-${question.id}-${idx}`}
-                      className={`cursor-pointer transition-all duration-200 ${
-                        active
-                          ? "bg-[#E5C17A] text-white shadow-md"
-                          : "border border-[#A8CBB7] hover:bg-[#F7E6C3]/50"
-                      }`}
-                      onClick={() => handleFillClick(word)}
-                    >
-                      {word}
-                    </Badge>
-                  );
-                })}
-              </div>
             </div>
           )}
 

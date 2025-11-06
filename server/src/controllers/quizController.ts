@@ -211,7 +211,7 @@ export async function getQuizzes(req: Request, res: Response, next: NextFunction
 
 // 驗證答案是否正確
 function isAnswerCorrect(
-  questionType: 'single' | 'multiple' | 'fill' | 'cloze',
+  questionType: 'single' | 'multiple' | 'cloze',
   userAnswer: number | number[] | null,
   correctAnswer: number | number[]
 ): boolean {
@@ -219,8 +219,8 @@ function isAnswerCorrect(
     return false;
   }
 
-  if (questionType === 'single' || questionType === 'fill') {
-    // 單選和填空：直接比較數字
+  if (questionType === 'single') {
+    // 單選：直接比較數字
     return userAnswer === correctAnswer;
   }
 
