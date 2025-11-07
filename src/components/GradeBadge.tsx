@@ -6,46 +6,87 @@ interface GradeBadgeProps {
   grade: "S" | "A+" | "A" | "B+" | "B" | "C+" | "F";
 }
 
-const gradeStyles = {
-  S: {
-    gradient: "from-[#E5C17A] via-[#f4d89e] to-[#E5C17A]",
-    shadow: "shadow-[0_0_40px_rgba(229,193,122,0.6)]",
-    glow: "ring-4 ring-[#E5C17A]/30",
-  },
-  "A+": {
-    gradient: "from-[#F7E6C3] to-[#e8d9b5]",
-    shadow: "shadow-[0_0_20px_rgba(247,230,195,0.4)]",
-    glow: "ring-3 ring-[#F7E6C3]/25",
-  },
-  A: {
-    gradient: "from-[#e8ebe9] to-[#d9dcd9]",
-    shadow: "shadow-lg",
-    glow: "ring-2 ring-gray-200",
-  },
-  "B+": {
-    gradient: "from-[#A8CBB7] via-[#c5dccf] to-[#A8CBB7]",
-    shadow: "shadow-[0_0_30px_rgba(168,203,183,0.5)]",
-    glow: "ring-4 ring-[#A8CBB7]/30",
-  },
-  B: {
-    gradient: "from-[#A8CBB7] to-[#9fb8a8]",
-    shadow: "shadow-[0_0_25px_rgba(168,203,183,0.4)]",
-    glow: "ring-3 ring-[#A8CBB7]/25",
-  },
-  "C+": {
-    gradient: "from-gray-200 to-gray-300",
-    shadow: "shadow-md",
-    glow: "ring-2 ring-gray-300/50",
-  },
-  F: {
-    gradient: "from-gray-300 to-gray-400",
-    shadow: "shadow-sm",
-    glow: "ring-1 ring-gray-400/30",
-  },
-};
-
 export function GradeBadge({ grade }: GradeBadgeProps) {
-  const style = gradeStyles[grade];
+  // 檢測是否為移動設備（簡單版本）
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // 使用 inline style 來設定漸變背景（繞過 Tailwind 編譯問題）
+  const getBadgeStyle = (): React.CSSProperties => {
+    const size = isMobile ? "6rem" : "10rem"; // 手機 96px, 桌面 160px
+    const baseStyle: React.CSSProperties = {
+      width: size,
+      height: size,
+      borderRadius: "9999px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+      overflow: "hidden",
+    };
+
+    switch (grade) {
+      case "S":
+        return {
+          ...baseStyle,
+          backgroundImage:
+            "linear-gradient(to bottom right, #E5C17A, #f4d89e, #E5C17A)",
+          boxShadow:
+            "0 0 40px rgba(229, 193, 122, 0.6), 0 0 0 4px rgba(229, 193, 122, 0.3)",
+        };
+      case "A+":
+        return {
+          ...baseStyle,
+          backgroundImage: "linear-gradient(to bottom right, #F7E6C3, #e8d9b5)",
+          boxShadow:
+            "0 0 20px rgba(247, 230, 195, 0.4), 0 0 0 3px rgba(247, 230, 195, 0.25)",
+        };
+      case "A":
+        return {
+          ...baseStyle,
+          backgroundImage: "linear-gradient(to bottom right, #F7E6C3, #e8d9b5)",
+          boxShadow:
+            "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 2px rgba(242, 243, 162, 0.3)",
+        };
+      case "B+":
+        return {
+          ...baseStyle,
+          backgroundImage:
+            "linear-gradient(to bottom right, #A8CBB7, #c5dccf, #A8CBB7)",
+          boxShadow:
+            "0 0 30px rgba(168, 203, 183, 0.5), 0 0 0 4px rgba(168, 203, 183, 0.3)",
+        };
+      case "B":
+        return {
+          ...baseStyle,
+          backgroundImage: "linear-gradient(to bottom right, #A8CBB7, #9fb8a8)",
+          boxShadow:
+            "0 0 25px rgba(168, 203, 183, 0.4), 0 0 0 3px rgba(168, 203, 183, 0.25)",
+        };
+      case "C+":
+        return {
+          ...baseStyle,
+          backgroundImage: "linear-gradient(to bottom right, #e5e7eb, #d1d5db)",
+          boxShadow:
+            "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 2px rgba(209, 213, 219, 0.5)",
+        };
+      case "F":
+        return {
+          ...baseStyle,
+          backgroundImage: "linear-gradient(to bottom right, #d1d5db, #9ca3af)",
+          boxShadow:
+            "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(156, 163, 175, 0.3)",
+        };
+    }
+  };
 
   return (
     <motion.div
@@ -120,16 +161,26 @@ export function GradeBadge({ grade }: GradeBadgeProps) {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className={`
-          w-24 h-24 md:w-40 md:h-40 rounded-full 
-          bg-gradient-to-br ${style.gradient}
-          ${style.shadow} ${style.glow}
-          flex items-center justify-center
-          relative overflow-hidden
-        `}
+        style={getBadgeStyle()}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent" />
-        <span className="relative z-10 text-white drop-shadow-lg font-extrabold text-3xl md:text-6xl">
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "linear-gradient(to top, rgba(255, 255, 255, 0.2), transparent)",
+          }}
+        />
+        <span
+          style={{
+            position: "relative",
+            zIndex: 10,
+            color: "white",
+            filter: "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.3))",
+            fontWeight: 800,
+            fontSize: isMobile ? "1.875rem" : "3.75rem", // 手機 3xl (30px), 桌面 6xl (60px)
+          }}
+        >
           {grade}
         </span>
       </motion.div>

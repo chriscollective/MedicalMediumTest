@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { motion } from "motion/react";
 import { GradeBadge } from "../components/GradeBadge";
 import { Button } from "../components/ui/button";
@@ -18,6 +18,7 @@ import {
   checkLeaderboard,
   submitLeaderboard,
 } from "../services/leaderboardService";
+import { mmTitles, getRandomQuote } from "../data/mmContent";
 
 interface ResultPageProps {
   score: number;
@@ -46,13 +47,13 @@ const calculateGrade = (
 };
 
 const gradeMessages = {
-  S: "🌟 簡直完美！你已獲得醫療靈媒的真傳，堪稱百年難得一見的MM傳人！",
-  "A+": "✨ 無比優秀！你已經深入理解安東尼的療癒理念！讓我們一同暢飲西芹汁!",
-  A: "🌿 很好！繼續保持，你在療癒之路上走得很穩！",
-  "B+": "💚 不錯！再多閱讀一些，會有更多收穫！",
-  B: "🌱 還可以！建議重新閱讀相關章節！",
+  S: "🌟 簡直完美！你已獲得醫療靈媒的真傳，堪稱行走於人間的療癒天使！",
+  "A+": "✨ 無比優秀！你已經深入理解安東尼的療癒理念！如同免疫系統的大將軍!",
+  A: "🌿 非常好！繼續保持，你在療癒之路上走得很穩！讓我們乾一杯西芹汁!",
+  "B+": "💚 很不錯！再多閱讀一些，會有更多收穫！",
+  B: "🌱 已認證小粉絲！請保持閱讀與實作，可以持續進步喔！",
   "C+": "📚 需要加油！多花時間理解療癒知識！",
-  F: "🌾 別氣餒！從頭開始，可以多翻書，慢慢學習！",
+  F: "🌾 不要放棄！可以多翻書，慢慢學習！",
 };
 
 export function ResultPage({
@@ -68,6 +69,10 @@ export function ResultPage({
   const percentage = (score / totalQuestions) * 100;
   const grade = calculateGrade(percentage);
   const message = gradeMessages[grade];
+
+  // 獲取 MM 稱號和隨機語錄（使用 useMemo 確保語錄在組件生命週期中保持不變）
+  const mmTitle = mmTitles[grade];
+  const mmQuote = useMemo(() => getRandomQuote(), []);
 
   const [showLeaderboardDialog, setShowLeaderboardDialog] = useState(false);
   const [leaderboardRank, setLeaderboardRank] = useState(0);
@@ -158,6 +163,16 @@ export function ResultPage({
             <GradeBadge grade={grade} />
           </div>
 
+          {/* MM Title */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="space-y-2"
+          >
+            <h2 className="text-[#2d3436] text-3xl font-bold">{mmTitle}</h2>
+          </motion.div>
+
           {/* Score Info */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -167,15 +182,35 @@ export function ResultPage({
           >
             <p className="text-[#2d3436] text-xl">{message}</p>
             <p className="text-[#636e72]">
-              答對 {score} / {totalQuestions} 題（{percentage.toFixed(1)}%）
+              答對 {score} / {totalQuestions} 題
             </p>
+          </motion.div>
+
+          {/* MM Quote */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="max-w-2xl mx-auto"
+          >
+            <Card className="p-6 bg-gradient-to-br from-[#A8CBB7]/10 to-[#F7E6C3]/20 backdrop-blur-sm border-[#A8CBB7]/30 shadow-lg">
+              <div className="flex items-start gap-3">
+                <div className="text-3xl text-[#A8CBB7] flex-shrink-0">❝</div>
+                <p className="text-[#2d3436] text-lg leading-relaxed italic pt-1">
+                  {mmQuote}
+                </p>
+                <div className="text-3xl text-[#A8CBB7] flex-shrink-0 self-end">
+                  ❞
+                </div>
+              </div>
+            </Card>
           </motion.div>
 
           {/* Action Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
             className="flex flex-wrap justify-center gap-4 pt-4"
           >
             <Button
@@ -223,7 +258,7 @@ export function ResultPage({
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.9 }}
+              transition={{ duration: 0.5, delay: 1.1 }}
               className="max-w-3xl mx-auto mt-12"
             >
               <Card className="p-6 bg-white/80 backdrop-blur-sm shadow-lg border-[#A8CBB7]/20">

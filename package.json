@@ -79,7 +79,6 @@
     "server:build": "tsc -p server/tsconfig.json",
     "server:start": "node server/dist/server.js",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
-    "migrate:questions": "tsx server/src/scripts/migrate-questions.ts",
-    "clone:fill-to-cloze": "tsx server/src/scripts/cloneFillToCloze.ts"
+    "migrate:questions": "tsx server/src/scripts/migrate-questions.ts"
   }
 }
