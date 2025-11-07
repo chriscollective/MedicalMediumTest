@@ -44,14 +44,39 @@ export function QuizPage({
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [apiQuestions, setApiQuestions] = useState<ApiQuestion[]>([]);
+
+  // 自動重試函數
+  const fetchWithRetry = async (
+    fetchFn: () => Promise<ApiQuestion[]>,
+    maxRetries = 2
+  ): Promise<ApiQuestion[]> => {
+    for (let i = 0; i <= maxRetries; i++) {
+      try {
+        return await fetchFn();
+      } catch (error) {
+        console.log(`[QuizPage] 嘗試 ${i + 1}/${maxRetries + 1} 失敗`);
+        if (i === maxRetries) {
+          throw error; // 最後一次重試失敗，拋出錯誤
+        }
+        // 等待後重試（第一次 1 秒，第二次 2 秒）
+        await new Promise((resolve) => setTimeout(resolve, (i + 1) * 1000));
+        console.log(`[QuizPage] 等待 ${i + 1} 秒後重試...`);
+      }
+    }
+    throw new Error("Retry failed"); // TypeScript 要求的返回
+  };
 
   // 載入題目
   useEffect(() => {
     async function loadQuestions() {
       try {
         setLoading(true);
+        setConnectionError(false);
+        setError(null);
 
         const startTime = performance.now();
         console.log(
@@ -75,7 +100,9 @@ export function QuizPage({
             difficulty: apiDifficulty,
           });
 
-          apiQuestions = await fetchMixedQuizQuestions(dbBooks, apiDifficulty);
+          apiQuestions = await fetchWithRetry(() =>
+            fetchMixedQuizQuestions(dbBooks, apiDifficulty)
+          );
         } else {
           // 單本書，使用原本的邏輯
           const bookDisplay = books[0] || "《神奇西芹汁》";
@@ -85,7 +112,9 @@ export function QuizPage({
             difficulty: apiDifficulty,
           });
 
-          apiQuestions = await fetchQuizQuestions(book, apiDifficulty);
+          apiQuestions = await fetchWithRetry(() =>
+            fetchQuizQuestions(book, apiDifficulty)
+          );
         }
 
         if (apiQuestions.length !== 20) {
@@ -141,13 +170,11 @@ export function QuizPage({
 
         setError(null);
       } catch (err: any) {
-        console.error("載入題目失敗:", err);
-        setError(err.message || "載入題目失敗，請稍後再試");
-        // 使用 Mock 資料作為備案
-        setQuestions(mockQuestions);
-
+        console.error("載入題目失敗（所有重試都失敗）:", err);
+        setConnectionError(true);
+        setError(err.message || "無法連接到伺服器");
         console.log(
-          "[QuizPage] 題目載入失敗，改用備援資料",
+          "[QuizPage] 題目載入失敗（所有重試都失敗）",
           new Date().toISOString()
         );
       } finally {
@@ -157,6 +184,16 @@ export function QuizPage({
 
     loadQuestions();
   }, [books, difficulty]);
+
+  // 手動重試函數
+  const handleRetry = () => {
+    setConnectionError(false);
+    setError(null);
+    setLoading(true);
+    setRetryCount((prev) => prev + 1);
+    // 觸發 useEffect 重新載入
+    window.location.reload();
+  };
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
 
@@ -401,22 +438,151 @@ export function QuizPage({
     );
   }
 
-  // Error 狀態（顯示警告但繼續使用 Mock 資料）
-  const showErrorBanner = error && questions.length > 0;
+  // Loading 狀態
+  if (loading) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "#FAFAF7" }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              width: "64px",
+              height: "64px",
+              border: "6px solid #E5C17A",
+              borderTopColor: "transparent",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+              margin: "0 auto 24px",
+            }}
+          />
+          <p style={{ color: "#636e72", fontSize: "16px" }}>
+            載入測驗中...
+          </p>
+          <style>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      </div>
+    );
+  }
+
+  // 連線錯誤頁面（類似 ResultPage 風格）
+  if (connectionError) {
+    return (
+      <div
+        className="min-h-screen relative overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, #FAFAF7 0%, #F7E6C3 100%)",
+        }}
+      >
+        <NatureAccents variant="minimal" />
+
+        <div className="container mx-auto px-4 py-12 relative z-10">
+          <div className="max-w-2xl mx-auto">
+            {/* 錯誤卡片 */}
+            <div
+              className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center"
+              style={{
+                border: "3px solid #E76F51",
+                boxShadow: "0 20px 60px rgba(231, 111, 81, 0.2)",
+              }}
+            >
+              {/* 錯誤圖示 */}
+              <div
+                style={{
+                  width: "120px",
+                  height: "120px",
+                  borderRadius: "50%",
+                  backgroundColor: "#FEE2E2",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 24px",
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="64"
+                  height="64"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#E76F51"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+              </div>
+
+              {/* 錯誤標題 */}
+              <h2
+                className="text-3xl md:text-4xl font-bold mb-4"
+                style={{ color: "#E76F51" }}
+              >
+                連線失敗
+              </h2>
+
+              {/* 錯誤訊息 */}
+              <p
+                className="text-lg mb-6"
+                style={{ color: "#636e72", lineHeight: "1.8" }}
+              >
+                {error || "無法連接到伺服器，請檢查您的網路連線"}
+              </p>
+
+              {/* MM 語錄風格的提示 */}
+              <div
+                className="bg-gradient-to-r from-[#F7E6C3] to-[#E5C17A] rounded-2xl p-6 mb-8"
+                style={{ border: "2px solid #E5C17A" }}
+              >
+                <p
+                  className="text-base italic"
+                  style={{ color: "#2d3436", lineHeight: "1.8" }}
+                >
+                  💡 <strong>提示：</strong>
+                  <br />
+                  請確認網路連線正常後，點擊下方按鈕重新載入測驗。
+                  <br />
+                  如果問題持續發生，請稍後再試。
+                </p>
+              </div>
+
+              {/* 按鈕 */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  onClick={handleRetry}
+                  size="lg"
+                  className="bg-[#A8CBB7] hover:bg-[#8FB0A0] text-white px-8 py-6 text-lg rounded-xl"
+                >
+                  重新載入資料
+                </Button>
+                <Button
+                  onClick={onBack}
+                  variant="outline"
+                  size="lg"
+                  className="border-2 border-[#A8CBB7] text-[#A8CBB7] hover:bg-[#F7E6C3]/30 px-8 py-6 text-lg rounded-xl"
+                >
+                  返回首頁
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-[#FAFAF7] to-[#F7E6C3]/30 relative overflow-hidden">
       {/* Nature Accents */}
       <NatureAccents variant="minimal" />
-
-      {/* Error Banner */}
-      {showErrorBanner && (
-        <div className="sticky top-0 z-50 bg-yellow-100 border-b border-yellow-300 px-4 py-2">
-          <p className="text-yellow-800 text-sm text-center">
-            ⚠️ {error} - 目前使用範例題目
-          </p>
-        </div>
-      )}
 
       {/* Top Navigation */}
       <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm border-b border-[#A8CBB7]/20">
