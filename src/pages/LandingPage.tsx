@@ -78,6 +78,7 @@ export function LandingPage({
             </h1>
             <Sparkles className="w-8 h-8 text-[#E5C17A]" />
           </div>
+
           <p className="text-[#636e72] text-lg">
             測測你對安東尼療癒知識的理解程度 🌿
           </p>

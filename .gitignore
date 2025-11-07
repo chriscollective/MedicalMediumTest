@@ -49,3 +49,10 @@ Thumbs.db
 server/src/scripts/reset-admin.ts
 server/src/scripts/seed-admin.ts
 server/src/scripts/create-admin.ts
+
+# Load testing assets
+artillery.yml
+artillery-helpers.js
+loadtest-questions.json
+docs/stress-test.md
+q20.md
