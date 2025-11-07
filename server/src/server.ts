@@ -1,6 +1,14 @@
+// ============================================
+// 🚨 CRITICAL: 必須最先載入環境變數！
+// ============================================
+// 在 import 任何其他模組之前先載入 .env
+// 因為 middleware/auth.ts 需要 JWT_SECRET
+import dotenv from "dotenv";
+dotenv.config();
+
+// 現在可以安全地 import 其他模組了
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import { connectDatabase } from "./config/database";
 import { errorHandler } from "./middleware/errorHandler";
 import questionsRouter from "./routes/questions";
@@ -10,9 +18,6 @@ import analyticsRouter from "./routes/analytics";
 import leaderboardRouter from "./routes/leaderboardRoutes";
 import booksRouter from "./routes/books";
 import reportsRouter from "./routes/reports";
-
-// 載入環境變數
-dotenv.config();
 
 // ============================================
 // 環境變數驗證（啟動時檢查）
