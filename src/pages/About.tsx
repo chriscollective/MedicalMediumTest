@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
 import { Button } from "../components/ui/button";
 import {
@@ -13,6 +13,7 @@ import { NatureDecoration } from "../components/NatureDecoration";
 import { FloatingHerbs } from "../components/FloatingHerbs";
 import { Sparkles, ArrowLeft } from "lucide-react";
 import { useIsMobile } from "../utils/useIsMobile";
+import { ReportIssueDialog } from "../components/ReportIssueDialog";
 
 interface AboutProps {
   onBack: () => void;
@@ -20,6 +21,7 @@ interface AboutProps {
 
 export function About({ onBack }: AboutProps) {
   const { isMobile } = useIsMobile();
+  const [showReportDialog, setShowReportDialog] = useState(false);
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
       {/* 背景（沿用首頁） */}
@@ -106,10 +108,24 @@ export function About({ onBack }: AboutProps) {
             <CardHeader>
               <CardTitle className="text-[#2d3436]">聯絡方式</CardTitle>
             </CardHeader>
-            <CardContent className="text-[#2d3436]">
+            <CardContent className="text-[#2d3436] space-y-4">
               <p>
-                意見回饋與錯誤回報：請寄信至 E-mail:justakiss918@gmail.com
-                或填寫表單（連結）。
+                意見回饋與錯誤回報：請點選{" "}
+                <button
+                  onClick={() => setShowReportDialog(true)}
+                  className="
+                    text-[#A8CBB7] hover:text-white
+                    font-bold underline
+                    hover:bg-[#A8CBB7]
+                    px-2 py-1 rounded
+                    transition-all duration-300
+                    cursor-pointer
+                    hover:shadow-md
+                    hover:scale-105
+                  "
+                >
+                  問題回報
+                </button>
               </p>
               <p>
                 內容修正與下架請求：請提供具體書籍/題型/題目內容，我們會盡速處理。
@@ -142,6 +158,12 @@ export function About({ onBack }: AboutProps) {
           </div>
         </motion.div>
       </div>
+
+      {/* Report Issue Dialog */}
+      <ReportIssueDialog
+        open={showReportDialog}
+        onClose={() => setShowReportDialog(false)}
+      />
     </div>
   );
 }

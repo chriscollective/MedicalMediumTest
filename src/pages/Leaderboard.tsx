@@ -14,6 +14,7 @@ import { NatureDecoration } from "../components/NatureDecoration";
 import { FloatingHerbs } from "../components/FloatingHerbs";
 import { Sparkles } from "lucide-react";
 import { useIsMobile } from "../utils/useIsMobile";
+// import { mmTitles } from "../data/mmContent"; // 暫時遮蔽 MM 稱號功能
 
 interface LeaderboardProps {
   onBack: () => void;
@@ -253,6 +254,13 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                           {formatDate(entry.createdAt)}
                         </div>
                       </div>
+
+                      {/* MM Title - 暫時遮蔽 */}
+                      {/* <div className="flex items-center px-3">
+                        <span className="text-base md:text-lg font-semibold text-[#2d3436] whitespace-nowrap">
+                          {mmTitles[entry.grade as keyof typeof mmTitles]}
+                        </span>
+                      </div> */}
 
                       {/* Grade Badge */}
                       <div className="flex items-center">

@@ -11,9 +11,10 @@ import {
 import { Card } from "../components/ui/card";
 import { NatureAccents } from "../components/NatureAccents";
 import { FloatingHerbs } from "../components/FloatingHerbs";
-import { Share2, RotateCcw, Home } from "lucide-react";
+import { Share2, RotateCcw, Home, AlertCircle } from "lucide-react";
 import { Question } from "../components/QuestionCard";
 import { LeaderboardNameDialog } from "../components/LeaderboardNameDialog";
+import { ReportIssueDialog } from "../components/ReportIssueDialog";
 import {
   checkLeaderboard,
   submitLeaderboard,
@@ -76,6 +77,7 @@ export function ResultPage({
 
   const [showLeaderboardDialog, setShowLeaderboardDialog] = useState(false);
   const [leaderboardRank, setLeaderboardRank] = useState(0);
+  const [showReportDialog, setShowReportDialog] = useState(false);
 
   // 檢查是否上榜
   useEffect(() => {
@@ -242,14 +244,26 @@ export function ResultPage({
               onClick={onHome}
               variant="outline"
               className="
-                border-[#A8CBB7] text-[#A8CBB7]
-                hover:bg-[#A8CBB7] hover:text-white
-                rounded-xl px-6
+                        bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8]
+                text-white rounded-xl px-6
+                hover:shadow-lg
                 transition-all duration-300
               "
             >
               <Home className="w-4 h-4 mr-2" />
               回首頁
+            </Button>
+            <Button
+              onClick={() => setShowReportDialog(true)}
+              variant="outline"
+              className="
+                     bg-gradient-to-r from-[#A8CBB7] to-[#9fb8a8]
+                text-white rounded-xl px-6
+                hover:shadow-lg
+                transition-all duration-300
+              "
+            >
+              問題回報
             </Button>
           </motion.div>
 
@@ -329,6 +343,12 @@ export function ResultPage({
         rank={leaderboardRank}
         onSubmit={handleSubmitLeaderboard}
         onClose={() => setShowLeaderboardDialog(false)}
+      />
+
+      {/* Report Issue Dialog */}
+      <ReportIssueDialog
+        open={showReportDialog}
+        onClose={() => setShowReportDialog(false)}
       />
     </div>
   );
