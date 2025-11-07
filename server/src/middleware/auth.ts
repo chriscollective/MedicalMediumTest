@@ -2,7 +2,26 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-please-change-in-production';
+// 強制要求設定 JWT_SECRET 環境變數
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error(
+    '❌ CRITICAL: JWT_SECRET environment variable is not set!\n' +
+    'Please set JWT_SECRET in your .env file with a strong secret key (at least 32 characters).\n' +
+    'Example: JWT_SECRET=your-very-long-and-secure-random-string-here'
+  );
+}
+
+// 驗證 JWT_SECRET 強度
+if (JWT_SECRET.length < 32) {
+  throw new Error(
+    '❌ CRITICAL: JWT_SECRET is too short!\n' +
+    `Current length: ${JWT_SECRET.length} characters\n` +
+    'JWT_SECRET must be at least 32 characters for security.\n' +
+    'Please generate a stronger secret key.'
+  );
+}
 
 export interface AuthRequest extends Request {
   admin?: {

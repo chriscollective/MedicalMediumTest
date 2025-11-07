@@ -86,7 +86,9 @@ export function About({ onBack }: AboutProps) {
               <CardTitle className="text-[#2d3436]">免責聲明</CardTitle>
             </CardHeader>
             <CardContent className="text-[#2d3436]">
-              本站內容僅供教育與自我檢測，不構成任何醫療建議、診斷或治療。如有健康疑慮，請諮詢合格醫療人員。本站與原作者或出版社無任何關聯或授權。
+              本站內容僅供教育與自我檢測，不構成任何醫療建議、診斷或治療。如有健康疑慮，請諮詢合格醫療人員。
+              <br />
+              本站與原作者或出版社無任何關聯或授權。若有版權疑慮請聯繫站長，站長會立即處理。
             </CardContent>
           </Card>
 
@@ -96,7 +98,7 @@ export function About({ onBack }: AboutProps) {
             </CardHeader>
             <CardContent className="text-[#2d3436]">
               <p>
-                我是站長Chris，因為喜愛醫療靈媒的內容而製作了這個網站，希望各位粉絲可以玩得愉快!
+                我是站長Chris，一位前端工程師，資深醫療靈媒粉絲，因為要做side-project+喜愛醫療靈媒的內容，而製作了這個網站，希望各位粉絲可以玩得愉快!
               </p>
               <p>
                 讓我們一起走在療癒的路上，感謝慈悲高靈、安東尼、以及醫療靈媒粉絲團各位熱情的粉絲們!
@@ -127,9 +129,7 @@ export function About({ onBack }: AboutProps) {
                   問題回報
                 </button>
               </p>
-              <p>
-                內容修正與下架請求：請提供具體書籍/題型/題目內容，我們會盡速處理。
-              </p>
+              <p>有其他任何問題，請來信:justakiss918@gmail.com</p>
             </CardContent>
           </Card>
 

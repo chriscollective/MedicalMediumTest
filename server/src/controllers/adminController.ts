@@ -3,7 +3,22 @@ import { AuthRequest } from '../middleware/auth';
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-please-change-in-production';
+// 強制要求設定 JWT_SECRET 環境變數
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error(
+    '❌ CRITICAL: JWT_SECRET environment variable is not set!\n' +
+    'Please set JWT_SECRET in your .env file.'
+  );
+}
+
+if (JWT_SECRET.length < 32) {
+  throw new Error(
+    '❌ CRITICAL: JWT_SECRET is too short! Must be at least 32 characters.'
+  );
+}
+
 const JWT_EXPIRES_IN = '7d'; // Token valid for 7 days
 
 // Login
