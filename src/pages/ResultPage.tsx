@@ -360,17 +360,38 @@ export function ResultPage({
                 borderRadius: "50%",
                 background:
                   grade === "S"
-                    ? "linear-gradient(135deg, #FFD700, #FFA500)"
-                    : grade === "A+" || grade === "A"
-                    ? "linear-gradient(135deg, #E5C17A, #d4b86a)"
-                    : "linear-gradient(135deg, #A8CBB7, #9fb8a8)",
+                    ? "linear-gradient(135deg, #E5C17A, #f4d89e, #E5C17A)"
+                    : grade === "A+"
+                    ? "linear-gradient(135deg, #F7E6C3, #e8d9b5)"
+                    : grade === "A"
+                    ? "linear-gradient(135deg, #F7E6C3, #e8d9b5)"
+                    : grade === "B+"
+                    ? "linear-gradient(135deg, #A8CBB7, #c5dccf, #A8CBB7)"
+                    : grade === "B"
+                    ? "linear-gradient(135deg, #A8CBB7, #9fb8a8)"
+                    : grade === "C+"
+                    ? "linear-gradient(135deg, #e5e7eb, #d1d5db)"
+                    : "linear-gradient(135deg, #d1d5db, #9ca3af)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "72px",
                 fontWeight: "bold",
                 color: "white",
-                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+                boxShadow:
+                  grade === "S"
+                    ? "0 0 40px rgba(229, 193, 122, 0.6), 0 0 0 4px rgba(229, 193, 122, 0.3)"
+                    : grade === "A+"
+                    ? "0 0 20px rgba(247, 230, 195, 0.4), 0 0 0 3px rgba(247, 230, 195, 0.25)"
+                    : grade === "A"
+                    ? "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 2px rgba(242, 243, 162, 0.3)"
+                    : grade === "B+"
+                    ? "0 0 30px rgba(168, 203, 183, 0.5), 0 0 0 4px rgba(168, 203, 183, 0.3)"
+                    : grade === "B"
+                    ? "0 0 25px rgba(168, 203, 183, 0.4), 0 0 0 3px rgba(168, 203, 183, 0.25)"
+                    : grade === "C+"
+                    ? "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 2px rgba(209, 213, 219, 0.5)"
+                    : "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(156, 163, 175, 0.3)",
                 lineHeight: "1",
                 textAlign: "center",
               }}

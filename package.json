@@ -80,6 +80,7 @@
     "server:build": "tsc -p server/tsconfig.json",
     "server:start": "node server/dist/server.js",
     "dev:all": "chcp 65001 >nul & concurrently \"npm run dev\" \"npm run server\"",
-    "migrate:questions": "tsx server/src/scripts/migrate-questions.ts"
+    "migrate:questions": "tsx server/src/scripts/migrate-questions.ts",
+    "recalculate:leaderboard": "tsx server/src/scripts/recalculate-leaderboard.ts"
   }
 }

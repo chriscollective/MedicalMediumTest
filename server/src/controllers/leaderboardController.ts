@@ -295,6 +295,7 @@ export async function getLeaderboard(req: Request, res: Response, next: NextFunc
     // 格式化回傳資料
     const formattedLeaderboard = leaderboard.map(entry => ({
       rank: entry.rank,
+      userId: entry.userId,
       displayName: entry.displayName,
       difficulty: entry.difficulty,
       grade: entry.grade,
@@ -336,6 +337,7 @@ export async function getAllLeaderboards(req: Request, res: Response, next: Next
           book,
           entries: leaderboard.map(entry => ({
             rank: entry.rank,
+            userId: entry.userId,
             displayName: entry.displayName,
             difficulty: entry.difficulty,
             grade: entry.grade,
