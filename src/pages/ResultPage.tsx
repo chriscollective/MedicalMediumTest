@@ -10,8 +10,11 @@ import {
 } from "../components/ui/accordion";
 import { Card } from "../components/ui/card";
 import { NatureAccents } from "../components/NatureAccents";
+import { NatureDecoration } from "../components/NatureDecoration";
 import { FloatingHerbs } from "../components/FloatingHerbs";
+import { NaturalPattern } from "../components/NaturalPattern";
 import { Share2, RotateCcw, Home, AlertCircle } from "lucide-react";
+import { useIsMobile } from "../utils/useIsMobile";
 import { Question } from "../components/QuestionCard";
 import { LeaderboardNameDialog } from "../components/LeaderboardNameDialog";
 import { ReportIssueDialog } from "../components/ReportIssueDialog";
@@ -70,6 +73,7 @@ export function ResultPage({
   const percentage = (score / totalQuestions) * 100;
   const grade = calculateGrade(percentage);
   const message = gradeMessages[grade];
+  const { isMobile } = useIsMobile();
 
   // 獲取 MM 稱號和隨機語錄（使用 useMemo 確保語錄在組件生命週期中保持不變）
   const mmTitle = mmTitles[grade];
@@ -143,12 +147,23 @@ export function ResultPage({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAFAF7] via-white to-[#F7E6C3]/20 relative overflow-hidden">
-      {/* Background Glow */}
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-[#A8CBB7]/20 to-transparent blur-3xl" />
+    <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
+      {/* Background blur effect (disabled on mobile) */}
+      {!isMobile && (
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1604248215430-100912b27ead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwbmF0dXJlJTIwbGVhdmVzJTIwbGlnaHR8ZW58MXx8fHwxNzYxODA3MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: "blur(60px)",
+          }}
+        />
+      )}
 
-      {/* Nature Accents */}
-      <NatureAccents variant="decorative" />
+      {/* Nature Decorations */}
+      <NaturalPattern />
+      {!isMobile && <NatureDecoration />}
       <FloatingHerbs />
 
       <div className="relative z-10 container mx-auto px-4 py-16">
@@ -195,7 +210,7 @@ export function ResultPage({
             transition={{ duration: 0.6, delay: 0.7 }}
             className="max-w-2xl mx-auto"
           >
-            <Card className="p-6 bg-gradient-to-br from-[#A8CBB7]/10 to-[#F7E6C3]/20 backdrop-blur-sm border-[#A8CBB7]/30 shadow-lg">
+            <Card className="p-6 bg-white/40 backdrop-blur-sm border-[#A8CBB7]/30 shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="text-3xl text-[#A8CBB7] flex-shrink-0">❝</div>
                 <p className="text-[#2d3436] text-lg leading-relaxed italic pt-1">

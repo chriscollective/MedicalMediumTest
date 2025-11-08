@@ -62,7 +62,7 @@ export function LandingPage({
       {/* Nature Decorations */}
       <NaturalPattern />
       {!isMobile && <NatureDecoration />}
-      {!isMobile && <FloatingHerbs />}
+      <FloatingHerbs />
 
       <div className="relative z-10 container mx-auto px-4 min-h-screen flex flex-col items-center justify-center py-8">
         <motion.div

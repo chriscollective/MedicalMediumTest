@@ -4,7 +4,11 @@ import { QuestionCard, Question } from "../components/QuestionCard";
 import { QuizProgress } from "../components/QuizProgress";
 import { Button } from "../components/ui/button";
 import { NatureAccents } from "../components/NatureAccents";
+import { NatureDecoration } from "../components/NatureDecoration";
+import { FloatingHerbs } from "../components/FloatingHerbs";
+import { NaturalPattern } from "../components/NaturalPattern";
 import { ChevronLeft, ChevronRight, Home, Pause, Sparkles } from "lucide-react";
+import { useIsMobile } from "../utils/useIsMobile";
 import {
   fetchQuizQuestions,
   fetchMixedQuizQuestions,
@@ -13,7 +17,6 @@ import { createQuiz, submitQuiz } from "../services/quizService";
 import { getUserId } from "../utils/userStorage";
 import { Question as ApiQuestion } from "../types/question";
 import { getBookByDisplay, getDifficultyByKey } from "../constants/books";
-import { mockQuestions } from "../data/mockQuestions";
 
 interface QuizResult {
   score: number;
@@ -48,6 +51,7 @@ export function QuizPage({
   const [retryCount, setRetryCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [apiQuestions, setApiQuestions] = useState<ApiQuestion[]>([]);
+  const { isMobile } = useIsMobile();
 
   // 自動重試函數
   const fetchWithRetry = async (
@@ -79,10 +83,7 @@ export function QuizPage({
         setError(null);
 
         const startTime = performance.now();
-        console.log(
-          "[QuizPage] 開始載入測驗題目",
-          new Date().toISOString()
-        );
+        console.log("[QuizPage] 開始載入測驗題目", new Date().toISOString());
 
         // 使用映射轉換難度（beginner/advanced -> 初階/進階）
         const apiDifficulty = getDifficultyByKey(difficulty);
@@ -195,14 +196,6 @@ export function QuizPage({
     window.location.reload();
   };
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   const questionsPerPage = 5;
   const totalPages = Math.ceil(questions.length / questionsPerPage);
 
@@ -239,10 +232,9 @@ export function QuizPage({
         if (question.type === "cloze") {
           const expectedLength =
             question.clozeLength ?? question.options?.length ?? 0;
-          const answerArray = Array.isArray(answer)
-            ? (answer as string[])
-            : [];
-          isAnswered = expectedLength > 0 && answerArray.length === expectedLength;
+          const answerArray = Array.isArray(answer) ? (answer as string[]) : [];
+          isAnswered =
+            expectedLength > 0 && answerArray.length === expectedLength;
         } else if (Array.isArray(answer)) {
           isAnswered = answer.length > 0;
         } else {
@@ -429,40 +421,30 @@ export function QuizPage({
   // Loading 狀態
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#FAFAF7] to-[#F7E6C3]/30 flex items-center justify-center">
-        <div className="text-center">
-          <Sparkles className="w-12 h-12 text-[#A8CBB7] animate-pulse mx-auto mb-4" />
-          <p className="text-[#636e72] text-lg">正在載入題目...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Loading 狀態
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-linear-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
-        <NatureAccents variant="minimal" />
-        <div style={{ textAlign: "center", position: "relative", zIndex: 10 }}>
+      <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
+        {/* Background blur effect (disabled on mobile) */}
+        {!isMobile && (
           <div
+            className="absolute inset-0 opacity-30"
             style={{
-              width: "64px",
-              height: "64px",
-              border: "6px solid #E5C17A",
-              borderTopColor: "transparent",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-              margin: "0 auto 24px",
+              backgroundImage: `url('https://images.unsplash.com/photo-1604248215430-100912b27ead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwbmF0dXJlJTIwbGVhdmVzJTIwbGlnaHR8ZW58MXx8fHwxNzYxODA3MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "blur(60px)",
             }}
           />
-          <p style={{ color: "#636e72", fontSize: "16px" }}>
-            載入測驗中...
-          </p>
-          <style>{`
-            @keyframes spin {
-              to { transform: rotate(360deg); }
-            }
-          `}</style>
+        )}
+
+        {/* Nature Decorations */}
+        <NaturalPattern />
+        {!isMobile && <NatureDecoration />}
+        <FloatingHerbs />
+
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <Sparkles className="w-12 h-12 text-[#A8CBB7] animate-pulse mx-auto mb-4" />
+            <p className="text-[#636e72] text-lg">正在載入題目...</p>
+          </div>
         </div>
       </div>
     );
@@ -471,19 +453,30 @@ export function QuizPage({
   // 連線錯誤頁面（類似 ResultPage 風格）
   if (connectionError) {
     return (
-      <div
-        className="min-h-screen relative overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, #FAFAF7 0%, #F7E6C3 100%)",
-        }}
-      >
-        <NatureAccents variant="minimal" />
+      <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
+        {/* Background blur effect (disabled on mobile) */}
+        {!isMobile && (
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage: `url('https://images.unsplash.com/photo-1604248215430-100912b27ead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwbmF0dXJlJTIwbGVhdmVzJTIwbGlnaHR8ZW58MXx8fHwxNzYxODA3MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "blur(60px)",
+            }}
+          />
+        )}
+
+        {/* Nature Decorations */}
+        <NaturalPattern />
+        {!isMobile && <NatureDecoration />}
+        <FloatingHerbs />
 
         <div className="container mx-auto px-4 py-12 relative z-10">
           <div className="max-w-2xl mx-auto">
             {/* 錯誤卡片 */}
             <div
-              className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center"
+              className="bg-white/60 rounded-3xl shadow-2xl p-8 md:p-12 text-center"
               style={{
                 border: "3px solid #A8CBB7",
                 boxShadow: "0 20px 60px rgba(168, 203, 183, 0.3)",
@@ -523,9 +516,9 @@ export function QuizPage({
               {/* 錯誤標題 */}
               <h2
                 className="text-3xl md:text-4xl font-bold mb-4"
-                style={{ color: "#A8CBB7" }}
+                style={{ color: "#fe9882" }}
               >
-                連線失敗
+                資料庫連線失敗
               </h2>
 
               {/* 錯誤訊息 */}
@@ -546,6 +539,8 @@ export function QuizPage({
                   style={{ color: "#2d3436", lineHeight: "1.8" }}
                 >
                   💡 <strong>提示：</strong>
+                  <br />
+                  伺服器連線異常，可能是伺服器尚未啟動或網路連線異常。
                   <br />
                   請確認網路連線正常後，點擊下方按鈕重新載入測驗。
                   <br />
@@ -579,9 +574,24 @@ export function QuizPage({
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#FAFAF7] to-[#F7E6C3]/30 relative overflow-hidden">
-      {/* Nature Accents */}
-      <NatureAccents variant="minimal" />
+    <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-[#FAFAF7] via-[#F7E6C3]/20 to-[#A8CBB7]/10">
+      {/* Background blur effect (disabled on mobile) */}
+      {!isMobile && (
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1604248215430-100912b27ead?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwbmF0dXJlJTIwbGVhdmVzJTIwbGlnaHR8ZW58MXx8fHwxNzYxODA3MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: "blur(60px)",
+          }}
+        />
+      )}
+
+      {/* Nature Decorations */}
+      <NaturalPattern />
+      {!isMobile && <NatureDecoration />}
+      <FloatingHerbs />
 
       {/* Top Navigation */}
       <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm border-b border-[#A8CBB7]/20">

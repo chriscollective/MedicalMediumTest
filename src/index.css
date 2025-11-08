@@ -1549,6 +1549,14 @@
     background-color: #fffc;
   }
 
+  .bg-white\/40 {
+    background-color: rgba(255, 255, 255, 0.411);
+  }
+
+  .bg-white\/60 {
+    background-color: rgba(255, 255, 255, 0.24);
+  }
+
   @supports (color: color-mix(in lab, red, red)) {
     .bg-white\/80 {
       background-color: color-mix(

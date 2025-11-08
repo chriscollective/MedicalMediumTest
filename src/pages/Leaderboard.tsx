@@ -217,7 +217,10 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                 </div>
               ) : connectionError ? (
                 // 連線錯誤 Empty State
-                <div className="py-20 text-center relative" style={{ zIndex: 50 }}>
+                <div
+                  className="py-20 text-center relative"
+                  style={{ zIndex: 50 }}
+                >
                   <div
                     style={{
                       width: "100px",
@@ -250,7 +253,7 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                   </div>
                   <h3
                     className="text-2xl font-bold mb-3"
-                    style={{ color: "#A8CBB7" }}
+                    style={{ color: "#fe9882" }}
                   >
                     資料庫連線失敗
                   </h3>
@@ -260,7 +263,11 @@ export function Leaderboard({ onBack }: LeaderboardProps) {
                   <Button
                     onClick={handleRetry}
                     className="bg-[#A8CBB7] hover:bg-[#8FB0A0] text-white px-6 py-3 rounded-lg relative"
-                    style={{ zIndex: 100, position: "relative", cursor: "pointer" }}
+                    style={{
+                      zIndex: 100,
+                      position: "relative",
+                      cursor: "pointer",
+                    }}
                   >
                     重新載入資料
                   </Button>
