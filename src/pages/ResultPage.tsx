@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { motion } from "motion/react";
 import { GradeBadge } from "../components/GradeBadge";
 import { Button } from "../components/ui/button";
@@ -15,6 +15,7 @@ import { FloatingHerbs } from "../components/FloatingHerbs";
 import { NaturalPattern } from "../components/NaturalPattern";
 import { Share2, RotateCcw, Home, AlertCircle } from "lucide-react";
 import { useIsMobile } from "../utils/useIsMobile";
+import html2canvas from "html2canvas";
 import { Question } from "../components/QuestionCard";
 import { LeaderboardNameDialog } from "../components/LeaderboardNameDialog";
 import { ReportIssueDialog } from "../components/ReportIssueDialog";
@@ -22,7 +23,11 @@ import {
   checkLeaderboard,
   submitLeaderboard,
 } from "../services/leaderboardService";
-import { mmTitles, getRandomQuote } from "../data/mmContent";
+import {
+  mmTitlesDesktop,
+  mmTitlesMobile,
+  getRandomQuote,
+} from "../data/mmContent";
 
 interface ResultPageProps {
   score: number;
@@ -76,12 +81,48 @@ export function ResultPage({
   const { isMobile } = useIsMobile();
 
   // 獲取 MM 稱號和隨機語錄（使用 useMemo 確保語錄在組件生命週期中保持不變）
-  const mmTitle = mmTitles[grade];
+  const mmTitle = isMobile ? mmTitlesMobile[grade] : mmTitlesDesktop[grade];
   const mmQuote = useMemo(() => getRandomQuote(), []);
+
+  // 隨機選擇 4 個 FloatingHerbs（使用 useMemo 確保每次渲染保持一致）
+  const randomHerbs = useMemo(() => {
+    // 將 herbs 分成 4 個區域，確保選中的不會太近
+    const regions = {
+      topLeft: [
+        { emoji: '🌿', position: { top: '10%', left: '5%' } },
+        { emoji: '🌱', position: { top: '15%', left: '8%' } },
+      ],
+      topRight: [
+        { emoji: '🍃', position: { top: '10%', right: '8%' } },
+        { emoji: '🥬', position: { top: '15%', right: '5%' } },
+      ],
+      bottomLeft: [
+        { emoji: '🫐', position: { bottom: '15%', left: '8%' } },
+        { emoji: '🌸', position: { bottom: '10%', left: '5%' } },
+      ],
+      bottomRight: [
+        { emoji: '🍋', position: { bottom: '15%', right: '10%' } },
+        { emoji: '🌺', position: { bottom: '10%', right: '6%' } },
+      ],
+    };
+
+    // 從每個區域隨機選一個
+    const selected = [];
+    for (const region of Object.values(regions)) {
+      const randomIndex = Math.floor(Math.random() * region.length);
+      selected.push(region[randomIndex]);
+    }
+
+    return selected;
+  }, []);
 
   const [showLeaderboardDialog, setShowLeaderboardDialog] = useState(false);
   const [leaderboardRank, setLeaderboardRank] = useState(0);
   const [showReportDialog, setShowReportDialog] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+
+  // 用於截圖的隱藏區域 ref
+  const shareImageRef = useRef<HTMLDivElement>(null);
 
   // 檢查是否上榜
   useEffect(() => {
@@ -132,17 +173,74 @@ export function ResultPage({
     }
   };
 
-  const handleShare = () => {
-    const text = `我在「醫療靈媒隨堂測驗」中獲得了 ${grade} 等級！答對率 ${percentage.toFixed(
-      1
-    )}% 🌿`;
-    if (navigator.share) {
-      navigator.share({
-        title: "醫療靈媒隨堂測驗",
-        text: text,
+  const handleShare = async () => {
+    if (!shareImageRef.current) {
+      alert("無法生成分享圖片，請稍後再試");
+      return;
+    }
+
+    try {
+      setIsGeneratingImage(true);
+
+      // 使用 html2canvas 將隱藏的截圖區域轉換成圖片
+      const canvas = await html2canvas(shareImageRef.current, {
+        backgroundColor: "#FAFAF7",
+        scale: 2, // 提高解析度
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
       });
-    } else {
-      alert("分享功能在此瀏覽器不支援");
+
+      // 將 canvas 轉換成 blob
+      const blob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob((blob) => {
+          resolve(blob!);
+        }, "image/png");
+      });
+
+      const file = new File([blob], "medical-medium-quiz-result.png", {
+        type: "image/png",
+      });
+
+      const shareText = `我在「醫療靈媒隨堂測驗」中獲得了 ${grade} 等級！答對率 ${percentage.toFixed(
+        1
+      )}% 🌿`;
+
+      // 方案 1: 使用 Web Share API 分享圖片（支援手機）
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: "醫療靈媒隨堂測驗",
+            text: shareText,
+            files: [file],
+          });
+          setIsGeneratingImage(false);
+          return;
+        } catch (err) {
+          if (err instanceof Error && err.name !== "AbortError") {
+            console.log("Web Share API 分享失敗:", err);
+          }
+        }
+      }
+
+      // 方案 2: 下載圖片
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "medical-medium-quiz-result.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      alert(
+        "✅ 圖片已下載！\n\n您可以將下載的圖片分享到 Facebook 或其他社群平台。"
+      );
+    } catch (err) {
+      console.error("生成分享圖片失敗:", err);
+      alert("生成分享圖片失敗，請稍後再試");
+    } finally {
+      setIsGeneratingImage(false);
     }
   };
 
@@ -166,6 +264,176 @@ export function ResultPage({
       {!isMobile && <NatureDecoration />}
       <FloatingHerbs />
 
+      {/* 隱藏的截圖區域 - 使用內聯樣式避免 oklab 顏色問題 */}
+      <div
+        ref={shareImageRef}
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: 0,
+          width: "600px",
+          padding: "48px 32px",
+          background:
+            "linear-gradient(135deg, #FAFAF7 0%, rgba(247, 230, 195, 0.3) 50%, rgba(168, 203, 183, 0.15) 100%)",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          overflow: "hidden",
+        }}
+      >
+        {/* 內容容器 - 相對定位以便 herbs 可以正確定位 */}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {/* 靜態背景裝飾 - FloatingHerbs (隨機 4 個) */}
+          {randomHerbs.map((herb, index) => (
+            <div
+              key={index}
+              style={{
+                position: "absolute",
+                ...herb.position,
+                fontSize: "48px",
+                opacity: 0.3 + (index % 2) * 0.05,
+                zIndex: 0,
+              }}
+            >
+              {herb.emoji}
+            </div>
+          ))}
+
+        {/* 標題 */}
+        <h1
+          style={{
+            fontSize: "28px",
+            fontWeight: "bold",
+            color: "#2d3436",
+            textAlign: "center",
+            marginBottom: "32px",
+          }}
+        >
+          測驗完成 🌿
+        </h1>
+
+        {/* 獎章 */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: "32px",
+          }}
+        >
+          <div
+            style={{
+              width: "160px",
+              height: "160px",
+              borderRadius: "50%",
+              background:
+                grade === "S"
+                  ? "linear-gradient(135deg, #FFD700, #FFA500)"
+                  : grade === "A+" || grade === "A"
+                  ? "linear-gradient(135deg, #E5C17A, #d4b86a)"
+                  : "linear-gradient(135deg, #A8CBB7, #9fb8a8)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "72px",
+              fontWeight: "bold",
+              color: "white",
+              boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+              lineHeight: "1",
+              textAlign: "center",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                transform: "translateY(-30px)",
+              }}
+            >
+              {grade}
+            </span>
+          </div>
+        </div>
+
+        {/* MM 稱號 */}
+        <h2
+          style={{
+            fontSize: "32px",
+            fontWeight: "bold",
+            color: "#2d3436",
+            textAlign: "center",
+            marginBottom: "24px",
+            lineHeight: "1.4",
+          }}
+          dangerouslySetInnerHTML={{ __html: mmTitle }}
+        />
+
+        {/* 分數資訊 */}
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <p
+            style={{ fontSize: "20px", color: "#2d3436", marginBottom: "8px" }}
+          >
+            {message}
+          </p>
+          <p style={{ fontSize: "16px", color: "#636e72" }}>
+            答對 {score} / {totalQuestions} 題
+          </p>
+        </div>
+
+        {/* MM 語錄 */}
+        <div
+          style={{
+            background: "rgba(255, 255, 255, 0.9)",
+            border: "2px solid rgba(168, 203, 183, 0.4)",
+            borderRadius: "16px",
+            padding: "24px",
+            marginBottom: "32px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <div
+            style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}
+          >
+            <div style={{ fontSize: "32px", color: "#A8CBB7", flexShrink: 0 }}>
+              ❝
+            </div>
+            <p
+              style={{
+                fontSize: "18px",
+                lineHeight: "1.8",
+                fontStyle: "italic",
+                color: "#2d3436",
+                margin: 0,
+                paddingTop: "4px",
+                flex: 1,
+              }}
+            >
+              {mmQuote}
+            </p>
+            <div
+              style={{
+                fontSize: "32px",
+                color: "#A8CBB7",
+                flexShrink: 0,
+                alignSelf: "flex-end",
+              }}
+            >
+              ❞
+            </div>
+          </div>
+        </div>
+
+        {/* 網站標記 */}
+        <div
+          style={{
+            borderTop: "2px solid rgba(168, 203, 183, 0.3)",
+            paddingTop: "16px",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ fontSize: "14px", color: "#636e72", margin: 0 }}>
+            醫療靈媒隨堂測驗
+          </p>
+        </div>
+        </div> {/* 結束內容容器 */}
+      </div> {/* 結束隱藏截圖區域 */}
+
       <div className="relative z-10 container mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -187,7 +455,10 @@ export function ResultPage({
             transition={{ duration: 0.5, delay: 0.3 }}
             className="space-y-2"
           >
-            <h2 className="text-[#2d3436] text-3xl font-bold">{mmTitle}</h2>
+            <h2
+              className="text-[#2d3436] text-3xl font-bold"
+              dangerouslySetInnerHTML={{ __html: mmTitle }}
+            />
           </motion.div>
 
           {/* Score Info */}
@@ -213,7 +484,10 @@ export function ResultPage({
             <Card className="p-6 bg-white/40 backdrop-blur-sm border-[#A8CBB7]/30 shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="text-3xl text-[#A8CBB7] flex-shrink-0">❝</div>
-                <p className="text-[#2d3436] text-lg leading-relaxed italic pt-1">
+                <p
+                  className="text-[#2d3436] text-lg leading-relaxed pt-1"
+                  style={{ fontStyle: "italic" }}
+                >
                   {mmQuote}
                 </p>
                 <div className="text-3xl text-[#A8CBB7] flex-shrink-0 self-end">
@@ -232,16 +506,18 @@ export function ResultPage({
           >
             <Button
               onClick={handleShare}
+              disabled={isGeneratingImage}
               variant="outline"
               className="
                 border-[#E5C17A] text-[#E5C17A]
                 hover:bg-[#E5C17A] hover:text-white
                 rounded-xl px-6
                 transition-all duration-300
+                disabled:opacity-50 disabled:cursor-not-allowed
               "
             >
               <Share2 className="w-4 h-4 mr-2" />
-              分享到 Facebook
+              {isGeneratingImage ? "生成圖片中..." : "分享到 Facebook"}
             </Button>
             <Button
               onClick={onRestart}
