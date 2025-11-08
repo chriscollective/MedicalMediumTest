@@ -98,7 +98,7 @@ export function About({ onBack }: AboutProps) {
             </CardHeader>
             <CardContent className="text-[#2d3436]">
               <p>
-                我是站長Chris，一位前端工程師，資深醫療靈媒粉絲，因為要做side-project+喜愛醫療靈媒的內容，而製作了這個網站，希望各位粉絲可以玩得愉快!
+                我是站長Chris，一位前端工程師，醫療靈媒老粉絲，因為要做side-project+喜愛醫療靈媒的內容，而製作了這個網站，希望各位粉絲可以玩得愉快!
               </p>
               <p>
                 讓我們一起走在療癒的路上，感謝慈悲高靈、安東尼、以及醫療靈媒粉絲團各位熱情的粉絲們!
