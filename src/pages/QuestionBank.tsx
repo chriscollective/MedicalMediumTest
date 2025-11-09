@@ -110,8 +110,7 @@ const MIN_CLOZE_OPTIONS = 1;
 const MAX_CLOZE_OPTIONS = 6;
 const DEFAULT_CLOZE_OPTION_COUNT = 3;
 
-const createClozeOptions = (length: number) =>
-  Array.from({ length }, () => "");
+const createClozeOptions = (length: number) => Array.from({ length }, () => "");
 
 const createClozeOrder = (length: number) =>
   Array.from({ length }, (_, idx) => idx);
@@ -162,6 +161,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
   const [filterDifficulty, setFilterDifficulty] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterAuthor, setFilterAuthor] = useState<string>("all");
+  const [sortByAccuracy, setSortByAccuracy] = useState<string>("none"); // none | asc | desc
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<QuestionData | null>(
     null
@@ -216,15 +216,13 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
     try {
       setLoading(true);
       const startTime = performance.now();
-      console.log(
-        "[QuestionBank] 開始載入題庫資料",
-        new Date().toISOString()
-      );
+      console.log("[QuestionBank] 開始載入題庫資料", new Date().toISOString());
 
       const apiQuestions = await fetchQuestions({ limit: 1000 });
 
       // Convert API format to UI format
-      const uiQuestions: QuestionData[] = apiQuestions.map((q: ApiQuestion) => ({
+      const uiQuestions: QuestionData[] = apiQuestions.map(
+        (q: ApiQuestion) => ({
           id: q._id,
           question: q.question,
           type: typeMapping[q.type] ?? "單選",
@@ -238,7 +236,8 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
           createdAt: q.createdAt,
           updatedBy: q.updatedBy,
           updatedAt: q.updatedAt,
-        }));
+        })
+      );
 
       setQuestions(uiQuestions);
 
@@ -278,25 +277,46 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
     }
   };
 
-  const filteredQuestions = questions.filter((q) => {
-    const matchesSearch = q.question
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesBook = filterBook === "all" || q.book === filterBook;
-    const matchesDifficulty =
-      filterDifficulty === "all" || q.difficulty === filterDifficulty;
-    const matchesType = filterType === "all" || q.type === filterType;
-    const matchesAuthor =
-      filterAuthor === "all" ||
-      (q.createdBy || "").toLowerCase() === filterAuthor.toLowerCase();
-    return (
-      matchesSearch &&
-      matchesBook &&
-      matchesDifficulty &&
-      matchesType &&
-      matchesAuthor
-    );
-  });
+  const filteredQuestions = questions
+    .filter((q) => {
+      const matchesSearch = q.question
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesBook = filterBook === "all" || q.book === filterBook;
+      const matchesDifficulty =
+        filterDifficulty === "all" || q.difficulty === filterDifficulty;
+      const matchesType = filterType === "all" || q.type === filterType;
+      const matchesAuthor =
+        filterAuthor === "all" ||
+        (q.createdBy || "").toLowerCase() === filterAuthor.toLowerCase();
+      return (
+        matchesSearch &&
+        matchesBook &&
+        matchesDifficulty &&
+        matchesType &&
+        matchesAuthor
+      );
+    })
+    .sort((a, b) => {
+      if (sortByAccuracy === "none") return 0;
+
+      const statA = stats.get(a.id);
+      const statB = stats.get(b.id);
+
+      // 處理沒有統計資料的情況：將它們排在最後
+      const rateA = statA && statA.totalAnswers > 0 ? statA.correctRate : -1;
+      const rateB = statB && statB.totalAnswers > 0 ? statB.correctRate : -1;
+
+      if (rateA === -1 && rateB === -1) return 0;
+      if (rateA === -1) return 1; // A 沒有資料，排後面
+      if (rateB === -1) return -1; // B 沒有資料，排後面
+
+      if (sortByAccuracy === "asc") {
+        return rateA - rateB; // 低到高
+      } else {
+        return rateB - rateA; // 高到低
+      }
+    });
 
   // Pagination
   const totalPages = Math.ceil(filteredQuestions.length / itemsPerPage);
@@ -307,7 +327,14 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterBook, filterDifficulty, filterType, filterAuthor]);
+  }, [
+    searchTerm,
+    filterBook,
+    filterDifficulty,
+    filterType,
+    filterAuthor,
+    sortByAccuracy,
+  ]);
 
   const handleDelete = async (id: string) => {
     if (confirm("確定要刪除此題目嗎？")) {
@@ -327,23 +354,23 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
 
     let correctAnswerArray: number[] = [];
     let singleAnswer = 0;
-  let clozeOptions =
-    question.type === "克漏字" &&
-    question.options &&
-    question.options.length > 0
-      ? [...question.options]
-          .slice(0, MAX_CLOZE_OPTIONS)
-          .map((opt) => String(opt ?? "").trim())
-      : createClozeOptions(DEFAULT_CLOZE_OPTION_COUNT);
-  if (clozeOptions.length < MIN_CLOZE_OPTIONS) {
-    clozeOptions = createClozeOptions(DEFAULT_CLOZE_OPTION_COUNT);
-  }
-  let clozeOrder = ensureClozeOrderLength(
-    clozeOptions.length,
-    Array.isArray(question.correctAnswer)
-      ? (question.correctAnswer as number[])
-      : []
-  );
+    let clozeOptions =
+      question.type === "克漏字" &&
+      question.options &&
+      question.options.length > 0
+        ? [...question.options]
+            .slice(0, MAX_CLOZE_OPTIONS)
+            .map((opt) => String(opt ?? "").trim())
+        : createClozeOptions(DEFAULT_CLOZE_OPTION_COUNT);
+    if (clozeOptions.length < MIN_CLOZE_OPTIONS) {
+      clozeOptions = createClozeOptions(DEFAULT_CLOZE_OPTION_COUNT);
+    }
+    let clozeOrder = ensureClozeOrderLength(
+      clozeOptions.length,
+      Array.isArray(question.correctAnswer)
+        ? (question.correctAnswer as number[])
+        : []
+    );
 
     if (question.type === "多選") {
       correctAnswerArray = Array.isArray(question.correctAnswer)
@@ -429,10 +456,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
       return {
         ...prev,
         clozeOptions: newOptions,
-        clozeOrder: ensureClozeOrderLength(
-          newOptions.length,
-          prev.clozeOrder
-        ),
+        clozeOrder: ensureClozeOrderLength(newOptions.length, prev.clozeOrder),
       };
     });
   };
@@ -446,10 +470,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
       return {
         ...prev,
         clozeOptions: newOptions,
-        clozeOrder: ensureClozeOrderLength(
-          newOptions.length,
-          prev.clozeOrder
-        ),
+        clozeOrder: ensureClozeOrderLength(newOptions.length, prev.clozeOrder),
       };
     });
   };
@@ -515,13 +536,13 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
       let apiOptions: string[] | undefined;
       let apiFillOptions: string[] | undefined;
 
-  const normalizeOptions = (options: string[]) =>
-    options
-      .map((opt, idx) => ({
-        value: opt.trim(),
-        originalIndex: idx,
-      }))
-      .filter((entry) => entry.value.length > 0);
+      const normalizeOptions = (options: string[]) =>
+        options
+          .map((opt, idx) => ({
+            value: opt.trim(),
+            originalIndex: idx,
+          }))
+          .filter((entry) => entry.value.length > 0);
 
       if (formData.type === "單選") {
         const optionEntries = normalizeOptions(formData.options);
@@ -549,9 +570,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
           return;
         }
         const mappedAnswers = formData.correctAnswer.map((answerIdx) =>
-          optionEntries.findIndex(
-            (entry) => entry.originalIndex === answerIdx
-          )
+          optionEntries.findIndex((entry) => entry.originalIndex === answerIdx)
         );
         if (mappedAnswers.some((idx) => idx === -1)) {
           alert("請確認勾選的選項皆有填寫內容");
@@ -581,7 +600,10 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
           alert("克漏字題答案索引不可重複且需對應現有空格");
           return;
         }
-        if (sanitizedOrder.length < 1 || sanitizedOrder.length > clozeOptions.length) {
+        if (
+          sanitizedOrder.length < 1 ||
+          sanitizedOrder.length > clozeOptions.length
+        ) {
           alert("克漏字題答案數量需介於 1 與選項數量之間");
           return;
         }
@@ -882,7 +904,8 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                                 handleClozeOptionChange(idx, e.target.value)
                               }
                             />
-                            {formData.clozeOptions.length > MIN_CLOZE_OPTIONS && (
+                            {formData.clozeOptions.length >
+                              MIN_CLOZE_OPTIONS && (
                               <Button
                                 type="button"
                                 variant="ghost"
@@ -1000,10 +1023,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                             </Button>
                           </div>
                           {formData.clozeOrder.map((value, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center gap-2"
-                            >
+                            <div key={idx} className="flex items-center gap-2">
                               <span className="w-16 text-sm text-[#636e72]">
                                 第 {idx + 1} 空
                               </span>
@@ -1095,6 +1115,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                     </div>
 
                     {/* 只讀審計資訊（編輯模式顯示） */}
+                    <Label>修改紀錄</Label>
                     {editingQuestion && (
                       <div className="grid md:grid-cols-2 gap-4 p-4 rounded-lg bg-gray-50 border border-[#A8CBB7]/20">
                         <div className="space-y-1">
@@ -1259,6 +1280,20 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                   />
                 </div>
 
+                {/* 題型篩選 */}
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="題型" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">全部題型</SelectItem>
+                    <SelectItem value="單選">單選題</SelectItem>
+                    <SelectItem value="多選">多選題</SelectItem>
+                    <SelectItem value="克漏字">克漏字題</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* 書籍篩選 */}
                 <Select value={filterBook} onValueChange={setFilterBook}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="選擇書籍" />
@@ -1273,6 +1308,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                   </SelectContent>
                 </Select>
 
+                {/* 難度篩選 */}
                 <Select
                   value={filterDifficulty}
                   onValueChange={setFilterDifficulty}
@@ -1287,15 +1323,18 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                   </SelectContent>
                 </Select>
 
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="題型" />
+                {/* 正確率排序 */}
+                <Select
+                  value={sortByAccuracy}
+                  onValueChange={setSortByAccuracy}
+                >
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="正確率排序" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">全部題型</SelectItem>
-                    <SelectItem value="單選">單選題</SelectItem>
-                    <SelectItem value="多選">多選題</SelectItem>
-                    <SelectItem value="克漏字">克漏字題</SelectItem>
+                    <SelectItem value="none">正確率</SelectItem>
+                    <SelectItem value="asc">低到高</SelectItem>
+                    <SelectItem value="desc">高到低</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -1360,11 +1399,11 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                                 <div className="space-y-2">
                                   <div
                                     className="truncate overflow-hidden text-ellipsis whitespace-nowrap"
-                                  title={q.question}
-                                  style={{ maxWidth: "24rem" }}
-                                >
-                                  {q.question}
-                                </div>
+                                    title={q.question}
+                                    style={{ maxWidth: "24rem" }}
+                                  >
+                                    {q.question}
+                                  </div>
                                   {q.type === "克漏字" &&
                                     Array.isArray(q.correctAnswer) && (
                                       <div className="text-xs text-[#636e72] space-y-1">

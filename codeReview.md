@@ -11,6 +11,7 @@
 ### 1.1 使用者體驗優化
 
 #### ✅ MM 稱號和語錄系統
+
 - **位置**: `src/data/mmContent.ts`, `src/pages/ResultPage.tsx`
 - **優化內容**:
   - 根據測驗成績（S/A+/A/B+/B/C+/F）顯示對應的 MM 稱號
@@ -19,6 +20,7 @@
 - **影響**: 提升使用者成就感和參與度
 
 #### ✅ GradeBadge 視覺優化
+
 - **位置**: `src/components/GradeBadge.tsx:31-62`
 - **優化內容**:
   - 從 Tailwind 類別改為 inline style 實作
@@ -28,6 +30,7 @@
 - **影響**: 解決了顏色失效問題，提升品牌視覺一致性
 
 #### ✅ 按鈕 Hover 效果優化
+
 - **位置**: `src/pages/ReportManagement.tsx:287-337`
 - **優化內容**:
   - 使用 React 狀態 (`hoveredButton`) + inline style 實作 hover
@@ -38,6 +41,7 @@
 ### 1.2 功能完善
 
 #### ✅ 問題回報系統
+
 - **前端**: `src/components/ReportIssueDialog.tsx`, `src/pages/ReportManagement.tsx`
 - **後端**: `server/src/models/Report.ts`, `server/src/controllers/reportController.ts`
 - **功能**:
@@ -48,6 +52,7 @@
 - **資料庫**: MongoDB 持久化儲存，支援狀態管理和時間戳記
 
 #### ✅ 真正的刪除功能
+
 - **位置**: `server/src/controllers/reportController.ts:109-141`
 - **優化內容**:
   - 使用 `Report.findByIdAndDelete()` 真正從資料庫刪除
@@ -59,6 +64,7 @@
 ### 1.3 技術債務處理
 
 #### ✅ CORS 設定修復
+
 - **位置**: `server/src/server.ts:42`
 - **修復內容**: 添加 `PATCH` 方法到允許列表
 - **修復前**: 更新問題回報狀態失敗（CORS 阻擋）
@@ -66,6 +72,7 @@
 - **相關**: `methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]`
 
 #### ✅ Tailwind 問題識別與文檔化
+
 - **文檔**: `remind.md`, `PROJECT_SETUP_SOP.md`
 - **識別問題**:
   - Tailwind 未正確啟用動態編譯
@@ -77,6 +84,7 @@
 ### 1.4 安全性優化（已實作）
 
 #### ✅ 登入失敗鎖定機制
+
 - **位置**: `server/src/models/Admin.ts:98-121`
 - **機制**:
   - 5 次登入失敗後鎖定帳號 15 分鐘
@@ -85,11 +93,13 @@
 - **影響**: 防止暴力破解攻擊
 
 #### ✅ 密碼加密
+
 - **位置**: `server/src/models/Admin.ts:72-84`
 - **實作**: 使用 bcrypt (salt rounds = 10) pre-save hook 自動加密
 - **影響**: 資料庫不存明文密碼
 
 #### ✅ 輸入驗證
+
 - **位置**: `server/src/controllers/questionController.ts:4-140`
 - **驗證項目**:
   - 題目類型、選項數量、答案格式
@@ -107,6 +117,7 @@
 #### 🔄 前端效能
 
 **問題 1: 缺少 Code Splitting**
+
 ```typescript
 // 現狀：所有頁面都在 App.tsx 中直接 import
 import { QuizPage } from "./pages/QuizPage";
@@ -120,23 +131,27 @@ const Analytics = lazy(() => import("./pages/Analytics"));
 ```
 
 **影響**:
+
 - 初始包大小：1.34 MB (minified)
 - 建議拆分後：首頁 ~200KB，其他按需載入
 - **預期改善**: 首次載入速度提升 60-70%
 
 **問題 2: 圖片未優化**
+
 ```typescript
 // src/pages/About.tsx:32
-backgroundImage: "url('https://images.unsplash.com/photo-...?w=1080')"
+backgroundImage: "url('https://images.unsplash.com/photo-...?w=1080')";
 ```
 
 **建議**:
+
 - 使用 WebP 格式
 - 實作 lazy loading
 - 根據裝置提供不同尺寸 (srcset)
 - 考慮使用 CDN
 
 **問題 3: 缺少 Memoization**
+
 ```typescript
 // src/pages/ReportManagement.tsx:111-116
 const filteredReports = reports.filter((report) => {
@@ -146,6 +161,7 @@ const filteredReports = reports.filter((report) => {
 ```
 
 **建議**: 使用 `useMemo`
+
 ```typescript
 const filteredReports = useMemo(() => {
   return reports.filter((report) => {
@@ -178,12 +194,14 @@ reportSchema.index({ bookName: 1, status: 1 });
 **影響**: 查詢速度可提升 10-100 倍（資料量大時）
 
 **問題 5: N+1 查詢問題**
+
 ```typescript
 // 若未來有關聯查詢，建議使用 populate 或 aggregate
 // 避免在迴圈中查詢資料庫
 ```
 
 **問題 6: 缺少 API Response 快取**
+
 ```typescript
 // 建議：對不常變動的資料加上快取
 // 例如：書籍列表、題目統計等
@@ -196,6 +214,7 @@ const cache = new NodeCache({ stdTTL: 300 }); // 5 分鐘
 #### 🔄 錯誤處理統一
 
 **問題 7: 錯誤訊息不一致**
+
 ```typescript
 // 有些用 alert，有些用 console.error
 // src/pages/ReportManagement.tsx:62
@@ -206,6 +225,7 @@ alert("更新失敗，請稍後再試");
 ```
 
 **建議**: 建立統一的 Toast 通知系統
+
 ```typescript
 // utils/toast.ts
 import { toast } from "sonner"; // 已安裝
@@ -216,6 +236,7 @@ export const showWarning = (message: string) => toast.warning(message);
 ```
 
 **問題 8: API Response 格式不統一**
+
 ```typescript
 // 有些回傳 { success, data, message }
 // 有些直接回傳 data
@@ -231,6 +252,7 @@ interface ApiResponse<T> {
 #### 🔄 TypeScript 改善
 
 **問題 9: 使用 `any` 類型**
+
 ```typescript
 // server/src/controllers/reportController.ts:53
 const filter: any = {};
@@ -244,13 +266,18 @@ const filter: ReportFilter = {};
 ```
 
 **問題 10: 缺少嚴格的 Type Guards**
+
 ```typescript
 // src/services/authService.ts:95
 return JSON.parse(userStr);
 
 // 建議加上驗證
 const parsed = JSON.parse(userStr);
-if (parsed && typeof parsed.id === "string" && typeof parsed.username === "string") {
+if (
+  parsed &&
+  typeof parsed.id === "string" &&
+  typeof parsed.username === "string"
+) {
   return parsed as AdminUser;
 }
 return null;
@@ -261,6 +288,7 @@ return null;
 #### 🔄 載入狀態
 
 **問題 11: 缺少骨架屏 (Skeleton)**
+
 ```typescript
 // src/pages/ReportManagement.tsx:218-222
 {loading ? (
@@ -271,6 +299,7 @@ return null;
 ```
 
 **建議**: 使用 Skeleton UI 提升體驗
+
 ```typescript
 {loading ? (
   <div className="space-y-3">
@@ -282,6 +311,7 @@ return null;
 #### 🔄 錯誤邊界
 
 **問題 12: 缺少 Error Boundary**
+
 ```typescript
 // 建議在 App.tsx 加上
 import { ErrorBoundary } from "react-error-boundary";
@@ -299,7 +329,7 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 // 包裹整個應用
 <ErrorBoundary FallbackComponent={ErrorFallback}>
   <App />
-</ErrorBoundary>
+</ErrorBoundary>;
 ```
 
 ### 2.4 開發體驗
@@ -307,6 +337,7 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 #### 🔄 環境變數管理
 
 **問題 13: 缺少 `.env.example`**
+
 ```bash
 # 建議建立 .env.example
 MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/dbname
@@ -317,11 +348,12 @@ VITE_API_URL=http://localhost:5000/api
 ```
 
 **問題 14: 環境變數驗證**
+
 ```typescript
 // server/src/server.ts
 // 建議在啟動時驗證必要的環境變數
-const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
-requiredEnvVars.forEach(varName => {
+const requiredEnvVars = ["MONGODB_URI", "JWT_SECRET"];
+requiredEnvVars.forEach((varName) => {
   if (!process.env[varName]) {
     throw new Error(`Missing required environment variable: ${varName}`);
   }
@@ -335,23 +367,28 @@ requiredEnvVars.forEach(varName => {
 ### 3.1 邏輯錯誤
 
 #### ⚠️ 錯誤 1: localStorage 競態條件
+
 **位置**: `src/services/authService.ts:112-115`
+
 ```typescript
 // 問題：在模組載入時立即執行
 const token = getToken();
 if (token) {
-  api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 ```
 
 **風險**:
+
 - 如果 localStorage 還未載入，token 可能為 null
 - 多個 tab 同時登出時可能產生不一致狀態
 
 **建議**: 改為在 App 組件初始化時執行
 
 #### ⚠️ 錯誤 2: 未處理的 Promise Rejection
+
 **位置**: 多處 async 函數
+
 ```typescript
 // src/pages/ReportManagement.tsx:95
 const handleDelete = async (reportId: string) => {
@@ -363,7 +400,9 @@ const handleDelete = async (reportId: string) => {
 **建議**: 所有 async 函數都應有錯誤處理
 
 #### ⚠️ 錯誤 3: 狀態更新時機問題
+
 **位置**: `src/pages/ReportManagement.tsx:105`
+
 ```typescript
 // 從列表中移除
 setReports(reports.filter((r) => r._id !== reportId));
@@ -372,6 +411,7 @@ setReports(reports.filter((r) => r._id !== reportId));
 **風險**: 如果 API 失敗但已從 UI 移除，會造成不一致
 
 **建議**: 先等 API 成功，再更新 UI
+
 ```typescript
 try {
   await deleteReport(reportId);
@@ -384,7 +424,9 @@ try {
 ### 3.2 邊界情況
 
 #### ⚠️ 錯誤 4: 空陣列處理
+
 **位置**: `src/data/mmContent.ts:17-19`
+
 ```typescript
 export const getRandomQuote = (): string => {
   return mmQuotes[Math.floor(Math.random() * mmQuotes.length)];
@@ -394,6 +436,7 @@ export const getRandomQuote = (): string => {
 **風險**: 如果 `mmQuotes` 為空陣列，會回傳 `undefined`
 
 **建議**: 加上防禦性檢查
+
 ```typescript
 export const getRandomQuote = (): string => {
   if (mmQuotes.length === 0) return "加油！";
@@ -402,13 +445,16 @@ export const getRandomQuote = (): string => {
 ```
 
 #### ⚠️ 錯誤 5: 除以零
+
 **位置**: 統計計算中
+
 ```typescript
 // 如果 totalQuestions 為 0
 const percentage = (score / totalQuestions) * 100; // NaN
 ```
 
 **建議**: 加上檢查
+
 ```typescript
 const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
 ```
@@ -416,7 +462,9 @@ const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
 ### 3.3 型別安全
 
 #### ⚠️ 錯誤 6: 未驗證的類型斷言
+
 **位置**: `server/src/middleware/auth.ts:32`
+
 ```typescript
 const decoded = jwt.verify(token, JWT_SECRET) as any;
 ```
@@ -424,6 +472,7 @@ const decoded = jwt.verify(token, JWT_SECRET) as any;
 **風險**: 如果 JWT payload 被竄改，可能導致錯誤
 
 **建議**: 使用 Type Guard
+
 ```typescript
 interface JWTPayload {
   id: string;
@@ -453,44 +502,53 @@ if (!isJWTPayload(decoded)) {
 ### 4.1 嚴重等級 🚨
 
 #### 🚨 資安 1: JWT_SECRET 使用預設值
+
 **位置**:
+
 - `server/src/middleware/auth.ts:5`
 - `server/src/controllers/adminController.ts:6`
 
 **問題**:
+
 ```typescript
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-please-change-in-production';
+const JWT_SECRET =
+  process.env.JWT_SECRET || "your-secret-key-please-change-in-production";
 ```
 
 **風險**:
+
 - **嚴重性: CRITICAL**
 - 如果未設定環境變數，使用預設值
 - 攻擊者可以偽造任何 JWT token
 - 可以以任何管理員身份登入
 
 **改善方案**:
+
 ```typescript
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
+  throw new Error("JWT_SECRET environment variable is required");
 }
 
 // 或檢查強度
 if (JWT_SECRET.length < 32) {
-  throw new Error('JWT_SECRET must be at least 32 characters');
+  throw new Error("JWT_SECRET must be at least 32 characters");
 }
 ```
 
 #### 🚨 資安 2: JWT 存在 localStorage
+
 **位置**: `src/services/authService.ts:32`
 
 **問題**:
+
 ```typescript
 localStorage.setItem(TOKEN_KEY, token);
 ```
 
 **風險**:
+
 - **嚴重性: HIGH**
 - 容易受 XSS 攻擊竊取
 - JavaScript 可完全存取
@@ -499,19 +557,21 @@ localStorage.setItem(TOKEN_KEY, token);
 **改善方案**:
 
 **選項 A: 使用 HttpOnly Cookie（推薦）**
+
 ```typescript
 // 後端設定
-res.cookie('authToken', token, {
-  httpOnly: true,    // JavaScript 無法存取
-  secure: true,      // 只在 HTTPS 傳輸
-  sameSite: 'strict', // CSRF 保護
-  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 天
+res.cookie("authToken", token, {
+  httpOnly: true, // JavaScript 無法存取
+  secure: true, // 只在 HTTPS 傳輸
+  sameSite: "strict", // CSRF 保護
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 天
 });
 
 // 前端自動帶入，不需手動處理
 ```
 
 **選項 B: 保持 localStorage 但加強防護**
+
 ```typescript
 // 1. 實作 CSP (Content Security Policy)
 // 2. 使用 XSS 防護 Header
@@ -520,55 +580,61 @@ res.cookie('authToken', token, {
 ```
 
 #### 🚨 資安 3: 密碼強度要求過低
+
 **位置**: `server/src/models/Admin.ts:35`
 
 **問題**:
+
 ```typescript
 minlength: 6,  // 只需 6 碼
 ```
 
 **風險**:
+
 - **嚴重性: MEDIUM**
 - 可在數小時內暴力破解
 - 不符合現代安全標準
 
 **改善方案**:
+
 ```typescript
 // 1. 提高到至少 12 碼
 minlength: 12,
+  // 2. 加入複雜度驗證
+  passwordSchema.pre("validate", function (next) {
+    const password = this.password;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*]/.test(password);
 
-// 2. 加入複雜度驗證
-passwordSchema.pre('validate', function(next) {
-  const password = this.password;
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const hasSpecialChar = /[!@#$%^&*]/.test(password);
-
-  if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
-    next(new Error('密碼必須包含大小寫字母、數字和特殊字元'));
-  }
-  next();
-});
+    if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+      next(new Error("密碼必須包含大小寫字母、數字和特殊字元"));
+    }
+    next();
+  });
 ```
 
 ### 4.2 高風險 ⚠️
 
 #### ⚠️ 資安 4: 缺少 HTTPS 強制
+
 **位置**: `server/src/server.ts`
 
 **問題**: 沒有強制使用 HTTPS
 
 **風險**:
+
 - 資料可被中間人攻擊截取
 - JWT token 明文傳輸
 - 密碼可被竊聽
 
 **改善方案**:
+
 ```typescript
 // 1. 生產環境強制 HTTPS
 app.use((req, res, next) => {
-  if (process.env.NODE_ENV === 'production' && !req.secure) {
+  if (process.env.NODE_ENV === "production" && !req.secure) {
     return res.redirect(301, `https://${req.headers.host}${req.url}`);
   }
   next();
@@ -577,86 +643,95 @@ app.use((req, res, next) => {
 // 2. 設定 HSTS Header
 app.use((req, res, next) => {
   res.setHeader(
-    'Strict-Transport-Security',
-    'max-age=31536000; includeSubDomains; preload'
+    "Strict-Transport-Security",
+    "max-age=31536000; includeSubDomains; preload"
   );
   next();
 });
 ```
 
 #### ⚠️ 資安 5: 缺少 CSP (Content Security Policy)
+
 **位置**: 全域
 
 **問題**: 沒有設定 CSP Header
 
 **風險**:
+
 - XSS 攻擊
 - 資料注入
 - Clickjacking
 
 **改善方案**:
-```typescript
-import helmet from 'helmet';
 
-app.use(helmet.contentSecurityPolicy({
-  directives: {
-    defaultSrc: ["'self'"],
-    scriptSrc: ["'self'", "'unsafe-inline'"], // 盡量避免 unsafe-inline
-    styleSrc: ["'self'", "'unsafe-inline'"],
-    imgSrc: ["'self'", "data:", "https://images.unsplash.com"],
-    connectSrc: ["'self'", "https://api.yourserver.com"],
-    fontSrc: ["'self'"],
-    objectSrc: ["'none'"],
-    mediaSrc: ["'self'"],
-    frameSrc: ["'none'"],
-  },
-}));
+```typescript
+import helmet from "helmet";
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"], // 盡量避免 unsafe-inline
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https://images.unsplash.com"],
+      connectSrc: ["'self'", "https://api.yourserver.com"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  })
+);
 
 // 其他安全 Headers
 app.use(helmet.xssFilter());
 app.use(helmet.noSniff());
 app.use(helmet.ieNoOpen());
-app.use(helmet.frameguard({ action: 'deny' }));
+app.use(helmet.frameguard({ action: "deny" }));
 ```
 
 #### ⚠️ 資安 6: 缺少 Rate Limiting
+
 **位置**: API 路由
 
 **問題**: 沒有請求頻率限制
 
 **風險**:
+
 - 暴力破解攻擊
 - DDoS 攻擊
 - 資源耗盡
 
 **改善方案**:
+
 ```typescript
-import rateLimit from 'express-rate-limit';
+import rateLimit from "express-rate-limit";
 
 // 登入 API 嚴格限制
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 分鐘
   max: 5, // 最多 5 次嘗試
-  message: '登入嘗試次數過多，請 15 分鐘後再試',
+  message: "登入嘗試次數過多，請 15 分鐘後再試",
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-app.use('/api/admin/login', loginLimiter);
+app.use("/api/admin/login", loginLimiter);
 
 // 一般 API 限制
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: '請求過於頻繁，請稍後再試',
+  message: "請求過於頻繁，請稍後再試",
 });
 
-app.use('/api/', apiLimiter);
+app.use("/api/", apiLimiter);
 ```
 
 ### 4.3 中風險 ℹ️
 
 #### ℹ️ 資安 7: 輸入未清理（XSS 風險）
+
 **位置**: 所有使用者輸入
 
 **問題**: 未清理 HTML/JavaScript
@@ -664,8 +739,9 @@ app.use('/api/', apiLimiter);
 **風險**: XSS 攻擊
 
 **改善方案**:
+
 ```typescript
-import sanitizeHtml from 'sanitize-html';
+import sanitizeHtml from "sanitize-html";
 
 // 在儲存前清理
 const sanitizeInput = (input: string): string => {
@@ -684,6 +760,7 @@ const report = new Report({
 ```
 
 #### ℹ️ 資安 8: MongoDB Injection 風險
+
 **位置**: 所有資料庫查詢
 
 **問題**: 未過濾特殊字元
@@ -691,24 +768,27 @@ const report = new Report({
 **風險**: NoSQL Injection
 
 **改善方案**:
+
 ```typescript
-import mongoSanitize from 'express-mongo-sanitize';
+import mongoSanitize from "express-mongo-sanitize";
 
 // 全域中間件
-app.use(mongoSanitize({
-  replaceWith: '_',
-  onSanitize: ({ req, key }) => {
-    console.warn(`MongoDB injection attempt: ${key}`);
-  },
-}));
+app.use(
+  mongoSanitize({
+    replaceWith: "_",
+    onSanitize: ({ req, key }) => {
+      console.warn(`MongoDB injection attempt: ${key}`);
+    },
+  })
+);
 
 // 或手動檢查
 const sanitizeQuery = (query: any) => {
   const sanitized = { ...query };
-  Object.keys(sanitized).forEach(key => {
-    if (typeof sanitized[key] === 'string') {
+  Object.keys(sanitized).forEach((key) => {
+    if (typeof sanitized[key] === "string") {
       // 移除 $ 開頭的特殊操作符
-      sanitized[key] = sanitized[key].replace(/^\$/, '');
+      sanitized[key] = sanitized[key].replace(/^\$/, "");
     }
   });
   return sanitized;
@@ -716,9 +796,11 @@ const sanitizeQuery = (query: any) => {
 ```
 
 #### ℹ️ 資安 9: CORS 設定過於寬鬆（未來風險）
+
 **位置**: `server/src/server.ts:20-25`
 
 **問題**:
+
 ```typescript
 const allowedOrigins = [
   "http://localhost:5173",
@@ -731,38 +813,44 @@ const allowedOrigins = [
 **風險**: 如果 `FRONTEND_URL` 被竄改
 
 **改善方案**:
+
 ```typescript
 // 白名單驗證
 const ALLOWED_ORIGINS = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://medical-medium-test.vercel.app',
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://medical-medium-test.vercel.app",
 ];
 
 // 只允許明確的域名
 const allowedOrigins = ALLOWED_ORIGINS.filter(Boolean);
 
 // 不允許動態域名
-if (process.env.FRONTEND_URL &&
-    ALLOWED_ORIGINS.includes(process.env.FRONTEND_URL)) {
+if (
+  process.env.FRONTEND_URL &&
+  ALLOWED_ORIGINS.includes(process.env.FRONTEND_URL)
+) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }
 ```
 
 #### ℹ️ 資安 10: 錯誤訊息洩露資訊
+
 **位置**: 多處錯誤處理
 
 **問題**:
+
 ```typescript
 // server/src/controllers/adminController.ts:103
-console.error('Login error:', error);
+console.error("Login error:", error);
 res.status(500).json({
   success: false,
-  message: '登入時發生錯誤'  // ✅ 好的做法
+  message: "登入時發生錯誤", // ✅ 好的做法
 });
 ```
 
 **但在某些地方**:
+
 ```typescript
 // 可能洩露資料庫結構或內部邏輯
 catch (error) {
@@ -771,22 +859,24 @@ catch (error) {
 ```
 
 **改善方案**:
+
 ```typescript
 // 統一的錯誤處理中間件
 app.use((error, req, res, next) => {
   // 記錄完整錯誤（僅伺服器端）
-  console.error('Error:', error);
+  console.error("Error:", error);
 
   // 回傳通用訊息給用戶端（生產環境）
-  const message = process.env.NODE_ENV === 'production'
-    ? '伺服器錯誤，請稍後再試'
-    : error.message;
+  const message =
+    process.env.NODE_ENV === "production"
+      ? "伺服器錯誤，請稍後再試"
+      : error.message;
 
   res.status(500).json({
     success: false,
     message,
     // 開發環境才回傳 stack trace
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+    ...(process.env.NODE_ENV === "development" && { stack: error.stack }),
   });
 });
 ```
@@ -798,6 +888,7 @@ app.use((error, req, res, next) => {
 ### 5.1 測試
 
 #### 📝 問題：完全沒有測試
+
 **現狀**: 0 個測試檔案（除了 node_modules）
 
 **建議實作**:
@@ -805,75 +896,76 @@ app.use((error, req, res, next) => {
 ```typescript
 // 1. 單元測試 (Jest + React Testing Library)
 // src/components/__tests__/GradeBadge.test.tsx
-import { render } from '@testing-library/react';
-import { GradeBadge } from '../GradeBadge';
+import { render } from "@testing-library/react";
+import { GradeBadge } from "../GradeBadge";
 
-describe('GradeBadge', () => {
-  it('should render S grade with correct styles', () => {
+describe("GradeBadge", () => {
+  it("should render S grade with correct styles", () => {
     const { container } = render(<GradeBadge grade="S" />);
     const badge = container.firstChild;
     expect(badge).toHaveStyle({
-      backgroundImage: expect.stringContaining('#E5C17A'),
+      backgroundImage: expect.stringContaining("#E5C17A"),
     });
   });
 });
 
 // 2. API 測試 (Supertest)
 // server/src/__tests__/auth.test.ts
-import request from 'supertest';
-import app from '../server';
+import request from "supertest";
+import app from "../server";
 
-describe('POST /api/admin/login', () => {
-  it('should return token for valid credentials', async () => {
+describe("POST /api/admin/login", () => {
+  it("should return token for valid credentials", async () => {
     const response = await request(app)
-      .post('/api/admin/login')
-      .send({ username: 'admin', password: 'correct_password' });
+      .post("/api/admin/login")
+      .send({ username: "admin", password: "correct_password" });
 
     expect(response.status).toBe(200);
-    expect(response.body.data).toHaveProperty('token');
+    expect(response.body.data).toHaveProperty("token");
   });
 
-  it('should lock account after 5 failed attempts', async () => {
+  it("should lock account after 5 failed attempts", async () => {
     for (let i = 0; i < 5; i++) {
       await request(app)
-        .post('/api/admin/login')
-        .send({ username: 'admin', password: 'wrong' });
+        .post("/api/admin/login")
+        .send({ username: "admin", password: "wrong" });
     }
 
     const response = await request(app)
-      .post('/api/admin/login')
-      .send({ username: 'admin', password: 'correct_password' });
+      .post("/api/admin/login")
+      .send({ username: "admin", password: "correct_password" });
 
     expect(response.status).toBe(423);
-    expect(response.body.message).toContain('鎖定');
+    expect(response.body.message).toContain("鎖定");
   });
 });
 
 // 3. E2E 測試 (Playwright)
 // e2e/quiz.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('should complete quiz and see results', async ({ page }) => {
-  await page.goto('/');
-  await page.click('text=開始測驗');
+test("should complete quiz and see results", async ({ page }) => {
+  await page.goto("/");
+  await page.click("text=開始測驗");
 
   // 選擇書籍
   await page.check('[value="搶救肝臟"]');
-  await page.click('text=初階');
-  await page.click('text=開始');
+  await page.click("text=初階");
+  await page.click("text=開始");
 
   // 回答題目
   for (let i = 0; i < 20; i++) {
     await page.click('[data-testid="option-0"]');
-    await page.click('text=下一題');
+    await page.click("text=下一題");
   }
 
   // 驗證結果頁
-  await expect(page.locator('text=測驗完成')).toBeVisible();
+  await expect(page.locator("text=測驗完成")).toBeVisible();
 });
 ```
 
 **覆蓋率目標**:
+
 - 關鍵業務邏輯: 80%+
 - API 端點: 70%+
 - UI 組件: 60%+
@@ -886,31 +978,33 @@ test('should complete quiz and see results', async ({ page }) => {
 
 ```typescript
 // 使用 Winston
-import winston from 'winston';
+import winston from "winston";
 
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || "info",
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
   transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' }),
+    new winston.transports.File({ filename: "error.log", level: "error" }),
+    new winston.transports.File({ filename: "combined.log" }),
   ],
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple(),
-  }));
+if (process.env.NODE_ENV !== "production") {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+    })
+  );
 }
 
 // 使用
-logger.info('User logged in', { userId: admin._id, username: admin.username });
-logger.error('Database connection failed', { error: error.message });
-logger.warn('Suspicious activity detected', { ip: req.ip, attempts: 5 });
+logger.info("User logged in", { userId: admin._id, username: admin.username });
+logger.error("Database connection failed", { error: error.message });
+logger.warn("Suspicious activity detected", { ip: req.ip, attempts: 5 });
 ```
 
 #### 📝 問題：缺少效能監控
@@ -935,8 +1029,8 @@ app.use(Sentry.Handlers.tracingHandler());
 app.use(Sentry.Handlers.errorHandler());
 
 // 自訂事件追蹤
-Sentry.captureMessage('Quiz completed', {
-  level: 'info',
+Sentry.captureMessage("Quiz completed", {
+  level: "info",
   extra: { score, userId, book },
 });
 ```
@@ -953,9 +1047,9 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -964,7 +1058,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install dependencies
         run: npm ci
@@ -1004,29 +1098,29 @@ jobs:
 
 ```typescript
 // 使用 Swagger/OpenAPI
-import swaggerJsdoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
 const swaggerOptions = {
   definition: {
-    openapi: '3.0.0',
+    openapi: "3.0.0",
     info: {
-      title: 'MMQuiz API',
-      version: '1.0.0',
-      description: '醫療靈媒測驗 API 文檔',
+      title: "MMQuiz API",
+      version: "1.0.0",
+      description: "醫療靈媒測驗 API 文檔",
     },
     servers: [
       {
-        url: 'http://localhost:5000',
-        description: '開發環境',
+        url: "http://localhost:5000",
+        description: "開發環境",
       },
     ],
   },
-  apis: ['./src/routes/*.ts'],
+  apis: ["./src/routes/*.ts"],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // 在路由中加上註解
 /**
@@ -1052,7 +1146,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
  *       401:
  *         description: 帳號或密碼錯誤
  */
-router.post('/login', login);
+router.post("/login", login);
 ```
 
 ### 5.5 資料庫
@@ -1088,18 +1182,14 @@ find $BACKUP_DIR -name "*.tar.gz" -mtime +30 -delete
 // migrations/20250107-add-report-priority.js
 module.exports = {
   async up(db, client) {
-    await db.collection('reports').updateMany(
-      {},
-      { $set: { priority: 'medium' } }
-    );
+    await db
+      .collection("reports")
+      .updateMany({}, { $set: { priority: "medium" } });
   },
 
   async down(db, client) {
-    await db.collection('reports').updateMany(
-      {},
-      { $unset: { priority: '' } }
-    );
-  }
+    await db.collection("reports").updateMany({}, { $unset: { priority: "" } });
+  },
 };
 ```
 
@@ -1108,6 +1198,7 @@ module.exports = {
 #### 📝 建議加入的工具
 
 **ESLint 設定優化**:
+
 ```json
 // .eslintrc.json
 {
@@ -1116,11 +1207,11 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
-    "plugin:security/recommended"  // 安全性檢查
+    "plugin:security/recommended" // 安全性檢查
   ],
   "rules": {
     "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "@typescript-eslint/no-explicit-any": "error",  // 禁止 any
+    "@typescript-eslint/no-explicit-any": "error", // 禁止 any
     "react/prop-types": "off",
     "react-hooks/exhaustive-deps": "warn"
   }
@@ -1128,6 +1219,7 @@ module.exports = {
 ```
 
 **Prettier 設定**:
+
 ```json
 // .prettierrc
 {
@@ -1140,6 +1232,7 @@ module.exports = {
 ```
 
 **Husky + lint-staged**:
+
 ```json
 // package.json
 {
@@ -1212,17 +1305,20 @@ module.exports = {
 ### 🎯 建議行動
 
 **第一週**:
+
 1. 修復所有 🔴 級別的資安問題
 2. 建立 .env.example 和環境變數驗證
 3. 加入 Rate Limiting
 
 **第一個月**:
+
 1. 實作 HttpOnly Cookie
 2. 加入 Helmet 和 CSP
 3. 設定基本的 API 測試
 4. 設定 CI/CD
 
 **第二個月**:
+
 1. 效能優化（Code Splitting）
 2. 完善測試覆蓋率
 3. 加入監控和日誌
@@ -1239,6 +1335,7 @@ module.exports = {
 效能優化和監控可以逐步進行，不急於一時。
 
 **總體評分**: 7.5/10
+
 - 功能性: 9/10
 - 代碼品質: 7/10
 - 資安性: 5/10 ⚠️
@@ -1247,5 +1344,5 @@ module.exports = {
 
 ---
 
-**審查完成日期**: 2025-01-07
-**下次審查建議**: 1 個月後（2025-02-07）
+**審查完成日期**: 2025-011-07
+**下次審查建議**: 1 個月後（2025-12-07）
