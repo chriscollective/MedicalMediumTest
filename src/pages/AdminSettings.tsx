@@ -65,20 +65,29 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
     })();
   }, [mode]);
 
+  // Parse Tailwind-like arbitrary color gradient tokens into hex stops
+  // e.g. "from-[#B794F4] to-[#9F7AEA]" -> ["#B794F4", "#9F7AEA"]
+  const parseGradientStops = (colorSpec: string): string[] | null => {
+    const matches = [...colorSpec.matchAll(/#([A-Fa-f0-9]{6})/g)].map(
+      (m) => `#${m[1]}`
+    );
+    return matches.length >= 2 ? matches.slice(0, 2) : null;
+  };
+
   const items = [
     {
       id: "change-password",
       title: "修改密碼",
       description: "更新目前管理員的登入密碼",
-      icon: <KeyRound className="w-6 h-6 text-white" />,
+      icon: <KeyRound className="w-7 h-7 text-white" />,
       color: "from-[#A8CBB7] to-[#9fb8a8]",
       action: () => setMode("change-password"),
     },
     {
       id: "admin-list",
       title: "管理員名單",
-      description: "僅顯示名稱與各自的想說的話；只有本人可以編輯",
-      icon: <Users className="w-6 h-6 text-white" />,
+      description: "僅顯示名稱與各自的想說的話",
+      icon: <Users className="w-7 h-7 text-white" />,
       color: "from-[#E5C17A] to-[#d4b86a]",
       action: () => setMode("admin-list"),
     },
@@ -244,7 +253,7 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
                       <CardHeader>
                         <CardTitle className="text-[#2d3436]">{name}</CardTitle>
                         <CardDescription className="text-[#636e72]">
-                          只有本人可以編輯此名片
+                          辛勤且神聖的管理員
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -323,39 +332,75 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto"
+          transition={{ duration: 0.8 }}
+          className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto"
         >
-          {items.map((it, idx) => (
+          {items.map((item, index) => (
             <motion.div
-              key={it.id}
+              key={item.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <Card
-                className="cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-300 border-[#A8CBB7]/20 overflow-hidden group"
-                onClick={it.action}
+                className="
+                  cursor-pointer
+                  hover:shadow-xl hover:scale-105
+                  transition-all duration-300
+                  border-[#A8CBB7]/20
+                  overflow-hidden
+                  group
+                "
+                onClick={item.action}
               >
-                <div className={`h-1 bg-gradient-to-r ${it.color}`} />
+                {(() => {
+                  const stops = parseGradientStops(item.color);
+                  if (stops) {
+                    return (
+                      <div
+                        className={`h-2 bg-gradient-to-r ${item.color}`}
+                        style={{
+                          backgroundImage: `linear-gradient(to right, ${stops[0]}, ${stops[1]})`,
+                        }}
+                      />
+                    );
+                  }
+                  // Fallback to class-based if parsing fails
+                  return (
+                    <div className={`h-2 bg-gradient-to-r ${item.color}`} />
+                  );
+                })()}
                 <CardHeader>
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${it.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300`}
+                    className="
+                    inline-flex items-center justify-center
+                    w-14 h-14 rounded-2xl mb-4
+                    bg-gradient-to-br ${item.color}
+                    group-hover:scale-110
+                    transition-transform duration-300
+                  "
+                    style={(() => {
+                      const stops = parseGradientStops(item.color);
+                      return stops
+                        ? {
+                            backgroundImage: `linear-gradient(to bottom right, ${stops[0]}, ${stops[1]})`,
+                          }
+                        : undefined;
+                    })()}
                   >
-                    {it.icon}
+                    {item.icon}
                   </div>
-                  <CardTitle className="text-[#2d3436]">{it.title}</CardTitle>
+                  <CardTitle className="text-[#2d3436]">{item.title}</CardTitle>
                   <CardDescription className="text-[#636e72]">
-                    {it.description}
+                    {item.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button
                     variant="ghost"
-                    className="text-[#A8CBB7] hover:bg-[#F7E6C3]/30 w-full"
-                    onClick={it.action}
+                    className="w-full text-[#A8CBB7] hover:bg-[#F7E6C3]/30"
                   >
-                    前往
+                    進入管理 →
                   </Button>
                 </CardContent>
               </Card>
