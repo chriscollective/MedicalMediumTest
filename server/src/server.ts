@@ -22,11 +22,11 @@ import reportsRouter from "./routes/reports";
 // ============================================
 // 環境變數驗證（啟動時檢查）
 // ============================================
-console.log('🔍 驗證環境變數...');
+console.log("🔍 驗證環境變數...");
 
 const requiredEnvVars = [
-  { name: 'MONGODB_URI', description: 'MongoDB 連線字串' },
-  { name: 'JWT_SECRET', description: 'JWT 加密金鑰', minLength: 32 },
+  { name: "MONGODB_URI", description: "MongoDB 連線字串" },
+  { name: "JWT_SECRET", description: "JWT 加密金鑰", minLength: 32 },
 ];
 
 const missingVars: string[] = [];
@@ -47,19 +47,19 @@ requiredEnvVars.forEach(({ name, description, minLength }) => {
 });
 
 if (missingVars.length > 0) {
-  console.error('\n❌ 缺少必要的環境變數：\n' + missingVars.join('\n'));
-  console.error('\n請在 .env 文件中設定這些變數。');
-  console.error('參考 .env.example 檔案。\n');
+  console.error("\n❌ 缺少必要的環境變數：\n" + missingVars.join("\n"));
+  console.error("\n請在 .env 文件中設定這些變數。");
+  console.error("參考 .env.example 檔案。\n");
   process.exit(1);
 }
 
 if (weakVars.length > 0) {
-  console.error('\n⚠️  環境變數強度不足：\n' + weakVars.join('\n'));
-  console.error('\n為了安全性，請使用更強的值。\n');
+  console.error("\n⚠️  環境變數強度不足：\n" + weakVars.join("\n"));
+  console.error("\n為了安全性，請使用更強的值。\n");
   process.exit(1);
 }
 
-console.log('✅ 所有環境變數驗證通過\n');
+console.log("✅ 所有環境變數驗證通過\n");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -68,7 +68,8 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:5173", // 本地開發
   "http://localhost:3000", // 本地開發（備用端口）
-  "https://medical-medium-test.vercel.app", // Vercel 生產環境
+  "https://medical-medium-test.vercel.app",
+  "https://mmquiz.vercel.app", // Vercel 生產環境
   process.env.FRONTEND_URL, // 環境變數指定的前端 URL
 ].filter(Boolean); // 過濾掉 undefined
 
