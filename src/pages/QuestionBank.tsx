@@ -1268,9 +1268,10 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
               <CardTitle className="text-[#2d3436]">題目列表</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Filters */}
-              <div className="flex flex-wrap gap-4 items-center">
-                <div className="relative flex-1 min-w-[200px]">
+              {/* Filters - 與表格欄位對齊 */}
+              <div className="flex gap-4 items-center">
+                {/* 搜尋題目 - 9 */}
+                <div className="relative flex-[11]">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#636e72]" />
                   <Input
                     placeholder="搜尋題目..."
@@ -1280,76 +1281,89 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                   />
                 </div>
 
-                {/* 題型篩選 */}
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="題型" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部題型</SelectItem>
-                    <SelectItem value="單選">單選題</SelectItem>
-                    <SelectItem value="多選">多選題</SelectItem>
-                    <SelectItem value="克漏字">克漏字題</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* 題型篩選 - 2 */}
+                <div className="flex-[2]">
+                  <Select value={filterType} onValueChange={setFilterType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="題型" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">全部題型</SelectItem>
+                      <SelectItem value="單選">單選題</SelectItem>
+                      <SelectItem value="多選">多選題</SelectItem>
+                      <SelectItem value="克漏字">克漏字題</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                {/* 書籍篩選 */}
-                <Select value={filterBook} onValueChange={setFilterBook}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="選擇書籍" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部書籍</SelectItem>
-                    <SelectItem value="神奇西芹汁">神奇西芹汁</SelectItem>
-                    <SelectItem value="搶救肝臟">搶救肝臟</SelectItem>
-                    <SelectItem value="改變生命的食物">
-                      改變生命的食物
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* 書籍篩選 - 4 */}
+                <div className="flex-[3]">
+                  <Select value={filterBook} onValueChange={setFilterBook}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="選擇書籍" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">全部書籍</SelectItem>
+                      <SelectItem value="神奇西芹汁">神奇西芹汁</SelectItem>
+                      <SelectItem value="搶救肝臟">搶救肝臟</SelectItem>
+                      <SelectItem value="改變生命的食物">
+                        改變生命的食物
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                {/* 難度篩選 */}
-                <Select
-                  value={filterDifficulty}
-                  onValueChange={setFilterDifficulty}
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="難度" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部難度</SelectItem>
-                    <SelectItem value="初階">初階</SelectItem>
-                    <SelectItem value="進階">進階</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* 難度篩選 - 2 */}
+                <div className="flex-[2]">
+                  <Select
+                    value={filterDifficulty}
+                    onValueChange={setFilterDifficulty}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="難度" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">難度</SelectItem>
+                      <SelectItem value="初階">初階</SelectItem>
+                      <SelectItem value="進階">進階</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                {/* 正確率排序 */}
-                <Select
-                  value={sortByAccuracy}
-                  onValueChange={setSortByAccuracy}
-                >
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="正確率排序" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">正確率</SelectItem>
-                    <SelectItem value="asc">低到高</SelectItem>
-                    <SelectItem value="desc">高到低</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* 正確率排序 - 2 */}
+                <div className="flex-[2]">
+                  <Select
+                    value={sortByAccuracy}
+                    onValueChange={setSortByAccuracy}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="正確率" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">正確率</SelectItem>
+                      <SelectItem value="asc">低到高</SelectItem>
+                      <SelectItem value="desc">高到低</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                {/* 出題者篩選 */}
-                <Select value={filterAuthor} onValueChange={setFilterAuthor}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="出題者" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部出題者</SelectItem>
-                    <SelectItem value="Bebe">Bebe</SelectItem>
-                    <SelectItem value="Miruki">Miruki</SelectItem>
-                    <SelectItem value="Chris">Chris</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* 出題者篩選 - 4 */}
+                <div className="flex-[2]">
+                  <Select value={filterAuthor} onValueChange={setFilterAuthor}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="出題者" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">出題者</SelectItem>
+                      <SelectItem value="Bebe">Bebe</SelectItem>
+                      <SelectItem value="Miruki">Miruki</SelectItem>
+                      <SelectItem value="Chris">Chris</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* 留白 - 2 */}
+                <div className="flex-[2]"></div>
               </div>
 
               {/* Table */}
@@ -1364,14 +1378,14 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-[#F7E6C3]/20 border-[#A8CBB7]/20">
-                          <TableHead className="w-20">題號</TableHead>
-                          <TableHead className="w-96">題目內容</TableHead>
-                          <TableHead className="w-24">題型</TableHead>
-                          <TableHead className="w-32">書籍</TableHead>
-                          <TableHead className="w-20">難度</TableHead>
-                          <TableHead className="w-28">正確率</TableHead>
-                          <TableHead className="w-24">出題</TableHead>
-                          <TableHead className="w-32 text-right">
+                          <TableHead className="w-[4%]">題號</TableHead>
+                          <TableHead className="w-[44%]">題目內容</TableHead>
+                          <TableHead className="w-[8%]">題型</TableHead>
+                          <TableHead className="w-[12%]">書籍</TableHead>
+                          <TableHead className="w-[8%]">難度</TableHead>
+                          <TableHead className="w-[8%]">正確率</TableHead>
+                          <TableHead className="w-[8%]">出題</TableHead>
+                          <TableHead className="w-[8%] text-right">
                             操作
                           </TableHead>
                         </TableRow>
@@ -1392,10 +1406,10 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                               key={q.id}
                               className="border-[#A8CBB7]/20"
                             >
-                              <TableCell className="font-mono text-sm">
+                              <TableCell className="font-mono text-sm w-[4%]">
                                 #{startIndex + index + 1}
                               </TableCell>
-                              <TableCell className="max-w-96">
+                              <TableCell className="w-[32%]">
                                 <div className="space-y-2">
                                   <div
                                     className="truncate overflow-hidden text-ellipsis whitespace-nowrap"
@@ -1430,17 +1444,17 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                                     )}
                                 </div>
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="w-[8%]">
                                 <span className="px-2 py-1 bg-[#A8CBB7]/20 rounded text-sm">
                                   {q.type}
                                 </span>
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="w-[16%]">
                                 <span className="px-2 py-1 bg-[#F7E6C3]/50 rounded text-sm">
                                   {q.book}
                                 </span>
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="w-[8%]">
                                 <span
                                   className={`
                                   px-2 py-1 rounded text-sm
@@ -1454,7 +1468,7 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                                   {q.difficulty}
                                 </span>
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="w-[8%]">
                                 {(() => {
                                   const stat = stats.get(q.id);
                                   if (!stat || stat.totalAnswers === 0) {
@@ -1490,8 +1504,10 @@ export function QuestionBank({ onBack }: QuestionBankProps) {
                                   );
                                 })()}
                               </TableCell>
-                              <TableCell>{q.createdBy || "-"}</TableCell>
-                              <TableCell className="text-right">
+                              <TableCell className="w-[16%]">
+                                {q.createdBy || "-"}
+                              </TableCell>
+                              <TableCell className="w-[8%] text-right">
                                 <div className="flex justify-end gap-2">
                                   <Button
                                     variant="ghost"
