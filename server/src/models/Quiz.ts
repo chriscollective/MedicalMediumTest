@@ -5,10 +5,14 @@ export interface IQuiz extends Document {
   book: string;
   difficulty: '初階' | '進階';
   questions: mongoose.Types.ObjectId[];
+  answers: (number | number[])[]; // 使用者答案
   answerBitmap: string;
   correctCount: number;
   totalScore: number;
+  grade: string; // 等級
+  totalQuestions: number; // 總題數
   createdAt: Date;
+  completedAt?: Date; // 完成時間（選填）
 }
 
 const QuizSchema: Schema = new Schema({
@@ -40,6 +44,10 @@ const QuizSchema: Schema = new Schema({
       message: '每次測驗必須有 20 題'
     }
   },
+  answers: {
+    type: Schema.Types.Mixed, // 支援 number 或 number[]
+    default: []
+  },
   answerBitmap: {
     type: String,
     required: true,
@@ -63,10 +71,21 @@ const QuizSchema: Schema = new Schema({
     max: 100,
     default: 0
   },
+  grade: {
+    type: String,
+    default: 'F'
+  },
+  totalQuestions: {
+    type: Number,
+    default: 20
+  },
   createdAt: {
     type: Date,
     default: Date.now,
     index: true
+  },
+  completedAt: {
+    type: Date
   }
 });
 
