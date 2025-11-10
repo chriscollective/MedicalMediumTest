@@ -97,6 +97,7 @@
     "restore": "tsx server/src/scripts/restore-database.ts",
     "db:stats": "tsx server/src/scripts/check-database-stats.ts",
     "db:clear": "tsx server/src/scripts/clear-collections.ts",
+    "quiz:auto": "tsx server/src/scripts/auto-complete-quiz.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

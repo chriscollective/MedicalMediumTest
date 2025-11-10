@@ -7,7 +7,7 @@
 export const mmTitlesDesktop = {
   S: "🏆 MM Pro 療癒天使",
   "A+": "🌟 MM Guardian 肝臟守護者",
-  A: "🥬 MM Ambassador 西洋芹大使",
+  A: "🥬 MM Ambassador 西芹汁大使",
   "B+": "🍌 MM Intern 療癒實習生",
   B: "💚 MM miniFans 正牌小粉絲",
   "C+": "🌲 正在茁壯的MM幼苗",
@@ -18,7 +18,7 @@ export const mmTitlesDesktop = {
 export const mmTitlesMobile = {
   S: "🏆 MM Pro <br> 療癒天使",
   "A+": "🌟 MM Guardian <br> 肝臟守護者",
-  A: "🥬 MM Ambassador <br> 西洋芹大使",
+  A: "🥬 MM Ambassador <br> 西芹汁大使",
   "B+": "🍌 MM Intern <br>療癒實習生",
   B: "💚 MM miniFans <br> 正牌小粉絲",
   "C+": "🌲 正在茁壯的<br>MM幼苗",
