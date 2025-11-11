@@ -208,6 +208,27 @@ export async function submitLeaderboard(req: Request, res: Response, next: NextF
     const now = new Date();
     console.log('✅ 從 Quiz 查詢:', { quizId, userId, book, difficulty, score, grade });
 
+    // 🔒 防止重複提交：檢查該使用者是否已經有更好的成績
+    const existingEntry = await Leaderboard.findOne({ userId, book });
+    if (existingEntry) {
+      const newScore = { grade, difficulty, createdAt: now, score };
+      const comparison = compareScores(newScore, {
+        grade: existingEntry.grade,
+        difficulty: existingEntry.difficulty,
+        createdAt: existingEntry.createdAt
+      });
+
+      if (comparison >= 0) {
+        // 新成績沒有更好，拒絕提交
+        console.log('❌ 新成績沒有更好，拒絕提交');
+        return res.status(400).json({
+          success: false,
+          error: '你已經有更好的成績在榜上了，無需重複提交'
+        });
+      }
+      console.log('✅ 新成績更好，允許更新');
+    }
+
     // 1. 取得該書籍目前的所有榜單記錄
     const currentLeaderboard = await Leaderboard.find({ book }).lean();
     console.log('📊 目前榜單記錄數:', currentLeaderboard.length);

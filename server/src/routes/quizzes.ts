@@ -5,14 +5,15 @@ import {
   getQuiz,
   getQuizzes
 } from '../controllers/quizController';
+import { quizLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
-// POST /api/quizzes - 建立新測驗
-router.post('/', createQuiz);
+// POST /api/quizzes - 建立新測驗（限制次數，防止濫用）
+router.post('/', quizLimiter, createQuiz);
 
-// POST /api/quizzes/:quizId/submit - 提交測驗答案
-router.post('/:quizId/submit', submitQuiz);
+// POST /api/quizzes/:quizId/submit - 提交測驗答案（限制次數）
+router.post('/:quizId/submit', quizLimiter, submitQuiz);
 
 // GET /api/quizzes/:quizId - 取得測驗詳情
 router.get('/:quizId', getQuiz);

@@ -11,6 +11,7 @@ import express from "express";
 import cors from "cors";
 import { connectDatabase } from "./config/database";
 import { errorHandler } from "./middleware/errorHandler";
+import { globalLimiter } from "./middleware/rateLimiter";
 import questionsRouter from "./routes/questions";
 import quizzesRouter from "./routes/quizzes";
 import adminRouter from "./routes/admin";
@@ -95,6 +96,13 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ============================================
+// Rate Limiting - 防止 DDoS 和暴力破解
+// ============================================
+// 全域限制：每個 IP 每 15 分鐘最多 100 次請求
+app.use("/api/", globalLimiter);
+console.log("🛡️  Rate limiting enabled (100 req/15min per IP)");
 
 // Request logging
 app.use((req, res, next) => {

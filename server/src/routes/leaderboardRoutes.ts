@@ -5,14 +5,15 @@ import {
   getLeaderboard,
   getAllLeaderboards
 } from '../controllers/leaderboardController';
+import { leaderboardLimiter } from '../middleware/rateLimiter';
 
 const router = express.Router();
 
-// 檢查是否上榜
-router.post('/check', checkLeaderboard);
+// 檢查是否上榜（嚴格限制，防止洗榜）
+router.post('/check', leaderboardLimiter, checkLeaderboard);
 
-// 提交榜單名稱
-router.post('/submit', submitLeaderboard);
+// 提交榜單名稱（嚴格限制，防止洗榜）
+router.post('/submit', leaderboardLimiter, submitLeaderboard);
 
 // 取得單一書籍榜單
 router.get('/:book', getLeaderboard);
