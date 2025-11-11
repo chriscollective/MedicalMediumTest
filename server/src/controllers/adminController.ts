@@ -241,8 +241,8 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ success: false, message: "請提供目前密碼與新密碼" });
     }
 
-    if (typeof newPassword !== "string" || newPassword.length < 6) {
-      return res.status(400).json({ success: false, message: "新密碼長度至少需 6 碼" });
+    if (typeof newPassword !== "string" || newPassword.length < 8) {
+      return res.status(400).json({ success: false, message: "新密碼長度至少需 8 字元" });
     }
 
     const admin = await Admin.findById(adminId);

@@ -32,7 +32,7 @@ const adminSchema = new Schema<IAdmin>(
     password: {
       type: String,
       required: true,
-      minlength: 6,
+      minlength: 8, // 提高最小密碼長度至 8 字元
     },
     email: {
       type: String,
