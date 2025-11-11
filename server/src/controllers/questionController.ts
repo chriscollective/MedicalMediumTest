@@ -148,19 +148,31 @@ export async function getQuestions(
     // 偵錯用：輸出查詢參數（使用 ASCII 避免編碼問題）
     console.log("Query params:", { book, difficulty, type, limit, random });
 
+    // 🔒 安全的查詢建構：只使用允許的字串值
     const query: any = {};
-    if (book) query.book = book;
-    if (difficulty) query.difficulty = difficulty;
-    if (type) query.type = type;
+
+    // 只允許字串類型的值（防止 MongoDB 操作符注入）
+    if (book && typeof book === 'string') {
+      query.book = book;
+    }
+    if (difficulty && typeof difficulty === 'string') {
+      query.difficulty = difficulty;
+    }
+    if (type && typeof type === 'string') {
+      query.type = type;
+    }
 
     // 偵錯用：輸出 MongoDB 查詢物件
     console.log("MongoDB query:", query);
+
+    // 🔒 驗證並限制 limit 參數（防止過大的值）
+    const safeLimit = Math.min(Math.max(1, Number(limit) || 20), 100);
 
     if (random === "true") {
       // 隨機抽樣題目（$sample 依 limit 大小抽）
       const questions = await Question.aggregate([
         { $match: query },
-        { $sample: { size: Number(limit) } },
+        { $sample: { size: safeLimit } },
       ]);
       return res.json({
         success: true,
@@ -170,7 +182,7 @@ export async function getQuestions(
     }
 
     // 一般查詢：依條件查詢並限制筆數
-    const questions = await Question.find(query).limit(Number(limit));
+    const questions = await Question.find(query).limit(safeLimit);
     return res.json({
       success: true,
       data: questions,

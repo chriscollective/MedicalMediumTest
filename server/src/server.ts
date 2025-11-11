@@ -9,6 +9,7 @@ dotenv.config();
 // 現在可以安全地 import 其他模組了
 import express from "express";
 import cors from "cors";
+import mongoSanitize from "express-mongo-sanitize";
 import { connectDatabase } from "./config/database";
 import { errorHandler } from "./middleware/errorHandler";
 import { globalLimiter } from "./middleware/rateLimiter";
@@ -96,6 +97,18 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ============================================
+// NoSQL Injection 防護
+// ============================================
+// 移除請求中的 $、. 等 MongoDB 操作符
+app.use(mongoSanitize({
+  replaceWith: '_', // 將惡意字符替換為 _
+  onSanitize: ({ req, key }) => {
+    console.warn(`⚠️  Sanitized key "${key}" in request from ${req.ip}`);
+  }
+}));
+console.log("🛡️  MongoDB injection protection enabled");
 
 // ============================================
 // Rate Limiting - 防止 DDoS 和暴力破解

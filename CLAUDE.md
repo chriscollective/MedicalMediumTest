@@ -396,3 +396,43 @@ https://www.figma.com/design/a3i2fvV92IFl19Lom9aKXH/醫療靈媒隨堂測驗介�
 - ✅ 整合前端與後端
 - ✅ 完成統計分析頁面
 - ✅ 實作管理員認證系統
+
+---
+
+## 與 Claude 的協作規則
+
+### 溝通語言
+- **必須使用繁體中文**回答和對話
+- 所有說明、註解、文件都使用繁體中文
+
+### 程式碼風格
+- **簡潔有效**：避免過度工程，直接解決問題
+- **可讀性優先**：清晰的變數命名、適當的註解
+- **可維護性**：模組化設計、遵循 DRY 原則
+- 使用 TypeScript strict mode
+- 錯誤處理必須完善
+
+### Git 工作流程
+- **每次修改都要 commit**：完成一個功能或修正後立即執行 `git add . && git commit`
+- **Commit message 格式**：
+  - 使用繁體中文
+  - 簡潔描述變更內容
+  - 包含 🤖 Generated with Claude Code 標記
+- **Push 權限**：
+  - ⚠️ **絕對不可主動 push**
+  - 每次 push 前**必須徵求使用者同意**
+  - 只在使用者明確要求時才執行 push
+
+### 範例 Commit Message
+```
+加入 NoSQL 注入防護機制
+
+- 安裝 express-mongo-sanitize 套件
+- 建立查詢參數驗證中間件
+- 修正 questionController 的安全問題
+- 整合三層防護機制
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```

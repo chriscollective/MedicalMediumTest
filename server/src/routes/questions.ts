@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { questionLimiter } from '../middleware/rateLimiter';
+import { validateQuestionQuery } from '../middleware/validateQuery';
 import {
   getQuestions,
   getQuestion,
@@ -12,7 +13,8 @@ import {
 const router = express.Router();
 
 // 題目查詢限制，防止爬蟲竊取題庫
-router.get('/', questionLimiter, getQuestions);
+// 加入查詢參數驗證，防止 NoSQL 注入
+router.get('/', questionLimiter, validateQuestionQuery, getQuestions);
 router.get('/:id', questionLimiter, getQuestion);
 // 將管理員資訊帶入建立/更新者欄位
 const withActor = (req: AuthRequest, _res: express.Response, next: express.NextFunction) => {
