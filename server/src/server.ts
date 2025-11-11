@@ -95,8 +95,13 @@ app.use(
   })
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ============================================
+// Request Body Size Limit - 防止超大 payload 攻擊
+// ============================================
+// 限制 JSON 和 URL-encoded 請求的大小為 10kb
+// 這可以防止 DoS 攻擊和記憶體耗盡
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // ============================================
 // NoSQL Injection 防護
