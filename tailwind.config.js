@@ -3,6 +3,14 @@ export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
+    // 自訂斷點：1024px 及以下使用手機版排版
+    screens: {
+      'sm': '640px',
+      'md': '1025px',  // 平板也使用手機版（原本 768px）
+      'lg': '1280px',
+      'xl': '1536px',
+      '2xl': '1920px',
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
