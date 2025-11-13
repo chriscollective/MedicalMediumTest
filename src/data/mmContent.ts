@@ -6,8 +6,8 @@
 // MM 稱號 - 桌面版（根據等級固定對應）- 一行顯示
 export const mmTitlesDesktop = {
   S: "🏆 MM Pro 療癒天使",
-  "A+": "🌟 MM Guardian 肝臟守護者",
-  A: "🥬 MM Ambassador 西芹汁大使",
+  "A+": "🌟 MM Guardian 知識守護者",
+  A: "🥬 MM Ambassador 西芹代言人",
   "B+": "🍌 MM Intern 療癒實習生",
   B: "💚 MM miniFans 正牌小粉絲",
   "C+": "🌲 正在茁壯的MM幼苗",
@@ -17,8 +17,8 @@ export const mmTitlesDesktop = {
 // MM 稱號 - 手機版（根據等級固定對應）- 兩行顯示
 export const mmTitlesMobile = {
   S: "🏆 MM Pro <br> 療癒天使",
-  "A+": "🌟 MM Guardian <br> 肝臟守護者",
-  A: "🥬 MM Ambassador <br> 西芹汁大使",
+  "A+": "🌟 MM Guardian <br> 知識守護者",
+  A: "🥬 MM Ambassador <br> 西芹代言人",
   "B+": "🍌 MM Intern <br>療癒實習生",
   B: "💚 MM miniFans <br> 正牌小粉絲",
   "C+": "🌲 正在茁壯的<br>MM幼苗",
